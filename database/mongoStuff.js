@@ -14,10 +14,14 @@ export const createUser = async (email, username, password, firstName, lastName,
 		});
 		return 1;
 	} catch (error) {
-		console.log(error.message);
-		//! diferent error for existent username and email
-		return error.code;
+		console.log(`!ERROR!${error.message}`);
+		return error.keyPattern;
 	}
+};
+
+export const getUserByEmail = async (email) => {
+	const user = await UserModel.findOne({ email: email });
+	return user;
 };
 
 export const createPost = async (title, description, user) => {
@@ -29,7 +33,7 @@ export const createPost = async (title, description, user) => {
 			status: 'sent',
 		});
 	} catch (error) {
-		console.log(error);
+		console.log(`!ERROR!${error.message}`);
 		return 0;
 	}
 };

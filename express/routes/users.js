@@ -1,12 +1,12 @@
 import express from 'express';
 import bcrypt from 'bcrypt';
-import { createUser } from '../../database/mongoStuff.js';
+import jwt from 'jsonwebtoken';
+import { createUser, getUserByEmail } from '../../database/mongoStuff.js';
 
 const router = express.Router();
 
 router.post('/register', async (req, res) => {
-	if (req.body.password) {
-		//* checks if api call is right
+	try {
 		const hashedPass = await bcrypt.hash(req.body.password, 10);
 		const dbResponse = await createUser(
 			req.body.email,
@@ -17,20 +17,38 @@ router.post('/register', async (req, res) => {
 			req.body.address,
 			'user'
 		);
-		//!error handle if user exists
-		switch (dbResponse) {
-			case 1:
-				res.sendStatus(201);
-				break;
+		if (dbResponse === 1) {
+			res.sendStatus(201);
+
 			//* duplicate error
-			case 11000:
-				res.sendStatus(409);
-				break;
-			default:
-				res.sendStatus(500);
-		}
-	} else {
-		res.sendStatus(400);
+		} else if (dbResponse.email) {
+			res.status(409).send('email already in use');
+		} else if (dbResponse.username) {
+			res.status(409).send('username already in use');
+		} else res.sendStatus(500);
+	} catch (error) {
+		console.log(`!ERROR!${error.message}`);
+		res.sendStatus(500);
+	}
+});
+
+router.post('/login', async (req, res) => {
+	try {
+		const user = await getUserByEmail(req.body.email);
+		if (user) {
+			if (await bcrypt.compare(req.body.password, user.password)) {
+				const token = await jwt.sign(
+					{
+						_id: user._id,
+					},
+					process.env.JWT_SECRET
+				);
+				res.send(token);
+			} else res.sendStatus(403);
+		} else res.sendStatus(404);
+	} catch (error) {
+		console.log(`!ERROR!${error.message}`);
+		res.sendStatus(500);
 	}
 });
 
