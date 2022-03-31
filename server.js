@@ -3,6 +3,7 @@ import cors from 'cors';
 import mongoose from 'mongoose';
 import express from 'express';
 import userRouter from './express/routes/users.js';
+import postRouter from './express/routes/posts.js';
 
 dotenv.config();
 
@@ -22,3 +23,4 @@ app.use(express.json());
 
 //routes
 app.use('/users', userRouter);
+app.use('/posts', postRouter);

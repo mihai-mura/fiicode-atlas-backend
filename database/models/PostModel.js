@@ -6,11 +6,10 @@ const postSchema = new mongoose.Schema(
 		description: { type: String, required: true },
 		user: { type: String, required: true },
 		status: { type: String, required: true }, //sent | seen | in-progress | resolved
-		//!videos,photos
 	},
 	{
 		collection: 'posts',
-		versionKey: 'false',
+		versionKey: false,
 		timestamps: true,
 	}
 );
