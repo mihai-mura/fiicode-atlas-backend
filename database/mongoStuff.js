@@ -15,7 +15,7 @@ export const createUser = async (email, password, firstName, lastName, address, 
 			role: role,
 		});
 		createProfilePic(createdUser._id, createdUser.first_name, createdUser.last_name);
-		return 1;
+		return createdUser._id;
 	} catch (error) {
 		console.log(error);
 		return error.code;
