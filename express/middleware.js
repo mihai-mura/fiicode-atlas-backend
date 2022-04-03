@@ -8,7 +8,7 @@ export const verifyToken = async (req, res, next) => {
 		req._id = user._id;
 		next();
 	} catch (error) {
-		console.log(`!ERROR!${error.message}`);
+		console.log(error);
 		return res.sendStatus(401);
 	}
 };
