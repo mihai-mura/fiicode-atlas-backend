@@ -18,6 +18,7 @@ const userSchema = new mongoose.Schema(
 		password: { type: String, required: true },
 		first_name: { type: String, required: true },
 		last_name: { type: String, required: true },
+		city: { type: String, required: true },
 		address: { type: addressSchema, default: null },
 		role: { type: String, required: true }, //  user | moderator
 	},

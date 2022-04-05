@@ -2,8 +2,9 @@ import UserModel from './models/UserModel.js';
 import PostModel from './models/PostModel.js';
 import createProfilePic from './fileStorage/profilePictures/createProfilePic.js';
 
-export const createUser = async (email, password, firstName, lastName, address, role) => {
+export const createUser = async (email, password, firstName, lastName, city, address, role) => {
 	try {
+		//first letter capitalized
 		const upperFirstName = firstName.charAt(0).toUpperCase() + firstName.slice(1);
 		const upperLastName = lastName.charAt(0).toUpperCase() + lastName.slice(1);
 		const createdUser = await UserModel.create({
@@ -11,6 +12,7 @@ export const createUser = async (email, password, firstName, lastName, address, 
 			password: password,
 			first_name: upperFirstName,
 			last_name: upperLastName,
+			city: city,
 			address: { name: address },
 			role: role,
 		});
@@ -27,13 +29,14 @@ export const getUserByEmail = async (email) => {
 	return user;
 };
 
-export const createPost = async (title, description, user) => {
+export const createPost = async (title, description, user, city) => {
 	//!pictures and videos
 	try {
 		const createdPost = await PostModel.create({
 			title: title,
 			description: description,
 			user: user,
+			city: city,
 			status: 'sent',
 		});
 		return 1;
