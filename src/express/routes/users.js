@@ -4,6 +4,7 @@ import jwt from 'jsonwebtoken';
 import { createUser, getUserByEmail } from '../../database/mongoStuff.js';
 import { verifyToken } from '../middleware.js';
 import { writeFileIdPicture } from '../../database/fileStorage/multerStuff.js';
+import firebaseBucket from '../../database/fileStorage/firebase/firebaseStorage.js';
 
 const router = express.Router();
 
@@ -39,7 +40,14 @@ router.post('/register', async (req, res) => {
 });
 
 router.post('/register/id', verifyToken, writeFileIdPicture.single('idPic'), (req, res) => {
-	res.sendStatus(200);
+	//* for firebase storage
+	try {
+		firebaseBucket.file(`user-IDs/${req._id}.png`).save(req.file.buffer);
+		res.sendStatus(200);
+	} catch (error) {
+		console.log(error);
+		res.sendStatus(500);
+	}
 });
 
 router.post('/login', async (req, res) => {
@@ -62,6 +70,7 @@ router.post('/login', async (req, res) => {
 	}
 });
 
+//* for local storage
 router.get('/profile-pic/:id', (req, res) => {
 	const _id = req.params.id;
 	res.sendFile(`${process.env.PROFILE_PIC_PATH}/${_id}.png`);

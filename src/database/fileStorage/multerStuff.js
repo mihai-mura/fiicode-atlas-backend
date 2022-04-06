@@ -1,4 +1,5 @@
 import multer from 'multer';
+import multerGoogleStorage from 'multer-google-storage';
 
 const idStorage = multer.diskStorage({
 	destination: (req, file, callback) => {
@@ -9,9 +10,16 @@ const idStorage = multer.diskStorage({
 	},
 });
 
+//* for local storage
+// export const writeFileIdPicture = multer({
+// 	storage: idStorage,
+// 	limits: {
+// 		fileSize: 1000000,
+// 	},
+// });
 export const writeFileIdPicture = multer({
-	storage: idStorage,
+	storage: multer.memoryStorage(),
 	limits: {
-		fileSize: 3000000, //! change for compresed id pic
+		fileSize: 1000000,
 	},
 });

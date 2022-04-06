@@ -1,5 +1,6 @@
 import nodeCanvas from 'canvas';
 import fs from 'fs';
+import firebaseBucket from '../firebase/firebaseStorage.js';
 
 //default bgc for profile pictures
 const colors = [
@@ -39,7 +40,8 @@ const createProfilePic = (_id, firstName, lastName) => {
 	context.fillText(`${firstName.charAt(0)}${lastName.charAt(0)}`, 180, 220);
 
 	const buffer = canvas.toBuffer('image/png');
-	fs.writeFileSync(`${process.env.PROFILE_PIC_PATH}/${_id}.png`, buffer);
+	firebaseBucket.file(`user-profilePics/${_id}.png`).save(buffer);
+	// fs.writeFileSync(`${process.env.PROFILE_PIC_PATH}/${_id}.png`, buffer); //* for local  storage
 };
 
 export default createProfilePic;
