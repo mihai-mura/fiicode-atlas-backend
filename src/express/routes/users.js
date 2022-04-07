@@ -42,7 +42,7 @@ router.post('/register', async (req, res) => {
 router.post('/register/id', verifyToken, writeFileIdPicture.single('idPic'), (req, res) => {
 	//* for firebase storage
 	try {
-		firebaseBucket.file(`user-IDs/${req._id}.png`).save(req.file.buffer);
+		firebaseBucket.file(`user-IDs/${req._id}.jpg`).save(req.file.buffer);
 		res.sendStatus(200);
 	} catch (error) {
 		console.log(error);
@@ -73,7 +73,7 @@ router.post('/login', async (req, res) => {
 //* for local storage
 router.get('/profile-pic/:id', (req, res) => {
 	const _id = req.params.id;
-	res.sendFile(`${process.env.PROFILE_PIC_PATH}/${_id}.png`);
+	res.sendFile(`${process.env.PROFILE_PIC_PATH}/${_id}.jpg`);
 });
 
 export default router;

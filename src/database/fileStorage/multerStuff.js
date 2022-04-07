@@ -1,12 +1,11 @@
 import multer from 'multer';
-import multerGoogleStorage from 'multer-google-storage';
 
 const idStorage = multer.diskStorage({
 	destination: (req, file, callback) => {
 		callback(null, process.env.ID_PATH);
 	},
 	filename: (req, file, callback) => {
-		callback(null, `${req._id}.png`);
+		callback(null, `${req._id}.jpg`);
 	},
 });
 

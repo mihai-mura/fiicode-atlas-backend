@@ -40,8 +40,8 @@ const createProfilePic = (_id, firstName, lastName) => {
 	context.fillText(`${firstName.charAt(0)}${lastName.charAt(0)}`, 180, 220);
 
 	const buffer = canvas.toBuffer('image/png');
-	firebaseBucket.file(`user-profilePics/${_id}.png`).save(buffer);
-	// fs.writeFileSync(`${process.env.PROFILE_PIC_PATH}/${_id}.png`, buffer); //* for local  storage
+	firebaseBucket.file(`user-profilePics/${_id}.jpg`).save(buffer);
+	// fs.writeFileSync(`${process.env.PROFILE_PIC_PATH}/${_id}.jpg`, buffer); //* for local  storage
 };
 
 export default createProfilePic;
