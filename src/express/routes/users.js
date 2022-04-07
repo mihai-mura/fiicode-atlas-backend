@@ -1,10 +1,11 @@
 import express from 'express';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
-import { createUser, getUserByEmail } from '../../database/mongoStuff.js';
+import { createUser, getProfilePictureUrl, getUserByEmail, updateUserIdPicUrl } from '../../database/mongoStuff.js';
 import { verifyToken } from '../middleware.js';
 import { writeFileIdPicture } from '../../database/fileStorage/multerStuff.js';
 import firebaseBucket from '../../database/fileStorage/firebase/firebaseStorage.js';
+import { createPersistentDownloadUrl } from '../../database/fileStorage/firebase/firebaseStorage.js';
 
 const router = express.Router();
 
@@ -39,10 +40,11 @@ router.post('/register', async (req, res) => {
 	}
 });
 
-router.post('/register/id', verifyToken, writeFileIdPicture.single('idPic'), (req, res) => {
-	//* for firebase storage
+router.post('/register/id', verifyToken, writeFileIdPicture.single('idPic'), async (req, res) => {
 	try {
 		firebaseBucket.file(`user-IDs/${req._id}.jpg`).save(req.file.buffer);
+		const downloadUrl = createPersistentDownloadUrl(`user-IDs/${req._id}.jpg`);
+		await updateUserIdPicUrl(req._id, downloadUrl);
 		res.sendStatus(200);
 	} catch (error) {
 		console.log(error);
@@ -71,9 +73,13 @@ router.post('/login', async (req, res) => {
 });
 
 //* for local storage
-router.get('/profile-pic/:id', (req, res) => {
-	const _id = req.params.id;
-	res.sendFile(`${process.env.PROFILE_PIC_PATH}/${_id}.jpg`);
+// router.get('/profile-pic/:id', (req, res) => {
+// 	const _id = req.params.id;
+// 	res.sendFile(`${process.env.PROFILE_PIC_PATH}/${_id}.jpg`);
+// });
+router.get('/profile-pic/:id', async (req, res) => {
+	const url = getProfilePictureUrl(req.params.id);
+	res.send(url.profile_pic_url);
 });
 
 export default router;

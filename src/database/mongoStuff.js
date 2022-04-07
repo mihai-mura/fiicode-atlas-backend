@@ -16,7 +16,8 @@ export const createUser = async (email, password, firstName, lastName, city, add
 			address: { name: address },
 			role: role,
 		});
-		createProfilePic(createdUser._id, createdUser.first_name, createdUser.last_name);
+		const profilePicURL = await createProfilePic(createdUser._id, createdUser.first_name, createdUser.last_name);
+		await UserModel.findByIdAndUpdate(createdUser._id, { profile_pic_url: profilePicURL });
 		return createdUser._id;
 	} catch (error) {
 		console.log(error);
@@ -29,8 +30,16 @@ export const getUserByEmail = async (email) => {
 	return user;
 };
 
+export const getProfilePictureUrl = async (_id) => {
+	const url = await UserModel.findById(_id).select({ profile_pic_url: 1, _id: 0 });
+	return url.profile_pic_url;
+};
+
+export const updateUserIdPicUrl = async (_id, idPicUrl) => {
+	await UserModel.findByIdAndUpdate(_id, { address: { id_url: idPicUrl } });
+};
+
 export const createPost = async (title, description, user, city) => {
-	//!pictures and videos
 	try {
 		const createdPost = await PostModel.create({
 			title: title,
