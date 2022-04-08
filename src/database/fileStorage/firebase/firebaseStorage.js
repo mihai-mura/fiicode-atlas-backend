@@ -13,4 +13,8 @@ const gcs = new Storage({
 
 const firebaseBucket = gcs.bucket('fiicode-30e25.appspot.com');
 
+export const createPersistentDownloadUrl = (pathToFile) => {
+	return `https://firebasestorage.googleapis.com/v0/b/${process.env.FIREBASE_BUCKET}/o/${encodeURIComponent(pathToFile)}?alt=media`;
+};
+
 export default firebaseBucket;
