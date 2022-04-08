@@ -30,6 +30,11 @@ export const getUserByEmail = async (email) => {
 	return user;
 };
 
+export const getUserRole = async (_id) => {
+	const role = await UserModel.findById(_id).select({ role: 1, _id: 0 });
+	return role.role;
+};
+
 export const getProfilePictureUrl = async (_id) => {
 	const url = await UserModel.findById(_id).select({ profile_pic_url: 1, _id: 0 });
 	return url.profile_pic_url;

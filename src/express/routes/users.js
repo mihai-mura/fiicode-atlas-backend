@@ -2,7 +2,7 @@ import express from 'express';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import { createUser, getProfilePictureUrl, getUserByEmail, updateUserIdPicUrl } from '../../database/mongoStuff.js';
-import { verifyToken } from '../middleware.js';
+import { authorize, verifyToken } from '../middleware.js';
 import { writeFileIdPicture } from '../../database/fileStorage/multerStuff.js';
 import firebaseBucket from '../../database/fileStorage/firebase/firebaseStorage.js';
 import { createPersistentDownloadUrl } from '../../database/fileStorage/firebase/firebaseStorage.js';
@@ -32,7 +32,7 @@ router.post('/register', async (req, res) => {
 				},
 				process.env.JWT_SECRET
 			);
-			res.status(201).send({ token, _id: dbResponse });
+			res.status(201).send(token);
 		}
 	} catch (error) {
 		console.log(error);
