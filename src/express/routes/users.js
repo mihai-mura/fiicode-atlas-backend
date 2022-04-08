@@ -12,7 +12,7 @@ const router = express.Router();
 router.post('/register', async (req, res) => {
 	try {
 		const hashedPass = await bcrypt.hash(req.body.password, 10);
-		const dbResponse = await createUser(
+		const user = await createUser(
 			req.body.email,
 			hashedPass,
 			req.body.firstName,
@@ -21,18 +21,29 @@ router.post('/register', async (req, res) => {
 			req.body.address,
 			'user'
 		);
-		if (dbResponse === 11000) {
+		if (user === 11000) {
 			//* duplicate error
 			res.status(409).send('email already in use');
 		} else {
 			//* dbResponse is the user _id
 			const token = jwt.sign(
 				{
-					_id: dbResponse,
+					_id: user._id,
 				},
 				process.env.JWT_SECRET
 			);
-			res.status(201).send(token);
+			res.status(201).send({
+				token,
+				user: {
+					_id: user._id,
+					email: user.email,
+					firstName: user.firstName,
+					lastName: user.lastName,
+					city: user.city,
+					address: user.address.name,
+					role: user.role,
+				},
+			});
 		}
 	} catch (error) {
 		console.log(error);
@@ -63,7 +74,18 @@ router.post('/login', async (req, res) => {
 					},
 					process.env.JWT_SECRET
 				);
-				res.send({ token, _id: user._id });
+				res.send({
+					token,
+					user: {
+						_id: user._id,
+						email: user.email,
+						firstName: user.firstName,
+						lastName: user.lastName,
+						city: user.city,
+						address: user.address.name,
+						role: user.role,
+					},
+				});
 			} else res.sendStatus(403);
 		} else res.sendStatus(404);
 	} catch (error) {
@@ -78,8 +100,8 @@ router.post('/login', async (req, res) => {
 // 	res.sendFile(`${process.env.PROFILE_PIC_PATH}/${_id}.jpg`);
 // });
 router.get('/profile-pic/:id', async (req, res) => {
-	const url = getProfilePictureUrl(req.params.id);
-	res.send(url.profile_pic_url);
+	const url = await getProfilePictureUrl(req.params.id);
+	res.send(url);
 });
 
 export default router;

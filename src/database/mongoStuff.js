@@ -2,7 +2,7 @@ import UserModel from './models/UserModel.js';
 import PostModel from './models/PostModel.js';
 import createProfilePic from './fileStorage/profilePictures/createProfilePic.js';
 
-export const createUser = async (email, password, firstName, lastName, city, address, role) => {
+export const createUser = async (email, password, firstName, lastName, city, addressName, role) => {
 	try {
 		//first letter capitalized
 		const upperFirstName = firstName.charAt(0).toUpperCase() + firstName.slice(1);
@@ -13,12 +13,13 @@ export const createUser = async (email, password, firstName, lastName, city, add
 			first_name: upperFirstName,
 			last_name: upperLastName,
 			city: city,
-			address: { name: address },
+			address: { name: addressName },
 			role: role,
 		});
+		console.log(createdUser);
 		const profilePicURL = await createProfilePic(createdUser._id, createdUser.first_name, createdUser.last_name);
 		await UserModel.findByIdAndUpdate(createdUser._id, { profile_pic_url: profilePicURL });
-		return createdUser._id;
+		return createdUser;
 	} catch (error) {
 		console.log(error);
 		return error.code;
@@ -41,7 +42,7 @@ export const getProfilePictureUrl = async (_id) => {
 };
 
 export const updateUserIdPicUrl = async (_id, idPicUrl) => {
-	await UserModel.findByIdAndUpdate(_id, { address: { id_url: idPicUrl } });
+	await UserModel.findByIdAndUpdate(_id, { 'address.id_url': idPicUrl }); //! problem here
 };
 
 export const createPost = async (title, description, user, city) => {

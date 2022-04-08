@@ -2,7 +2,7 @@ import mongoose from 'mongoose';
 
 const addressSchema = new mongoose.Schema(
 	{
-		name: String,
+		name: { type: String, required: true },
 		id_url: { type: String, default: null },
 		verified: { type: Boolean, default: false },
 	},
