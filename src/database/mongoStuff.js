@@ -26,6 +26,11 @@ export const createUser = async (email, password, firstName, lastName, city, add
 	}
 };
 
+export const getUserById = async (_id) => {
+	const user = await UserModel.findById(_id);
+	return user;
+};
+
 export const getUserByEmail = async (email) => {
 	const user = await UserModel.findOne({ email: email });
 	return user;

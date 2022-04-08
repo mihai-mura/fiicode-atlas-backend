@@ -1,7 +1,7 @@
 import express from 'express';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
-import { createUser, getProfilePictureUrl, getUserByEmail, updateUserIdPicUrl } from '../../database/mongoStuff.js';
+import { createUser, getProfilePictureUrl, getUserById, getUserByEmail, updateUserIdPicUrl } from '../../database/mongoStuff.js';
 import { authorize, verifyToken } from '../middleware.js';
 import { writeFileIdPicture } from '../../database/fileStorage/multerStuff.js';
 import firebaseBucket from '../../database/fileStorage/firebase/firebaseStorage.js';
@@ -37,8 +37,8 @@ router.post('/register', async (req, res) => {
 				user: {
 					_id: user._id,
 					email: user.email,
-					firstName: user.firstName,
-					lastName: user.lastName,
+					firstName: user.first_name,
+					lastName: user.last_name,
 					city: user.city,
 					address: user.address.name,
 					role: user.role,
@@ -79,8 +79,8 @@ router.post('/login', async (req, res) => {
 					user: {
 						_id: user._id,
 						email: user.email,
-						firstName: user.firstName,
-						lastName: user.lastName,
+						firstName: user.first_name,
+						lastName: user.last_name,
 						city: user.city,
 						address: user.address.name,
 						role: user.role,
@@ -88,6 +88,24 @@ router.post('/login', async (req, res) => {
 				});
 			} else res.sendStatus(403);
 		} else res.sendStatus(404);
+	} catch (error) {
+		console.log(error);
+		res.sendStatus(500);
+	}
+});
+
+router.get('/', verifyToken, async (req, res) => {
+	try {
+		const user = await getUserById(req._id);
+		res.send({
+			_id: user._id,
+			email: user.email,
+			firstName: user.first_name,
+			lastName: user.last_name,
+			city: user.city,
+			address: user.address.name,
+			role: user.role,
+		});
 	} catch (error) {
 		console.log(error);
 		res.sendStatus(500);
