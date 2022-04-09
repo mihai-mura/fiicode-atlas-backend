@@ -28,6 +28,7 @@ export const createUser = async (email, password, firstName, lastName, city, add
 
 export const getUserById = async (_id) => {
 	const user = await UserModel.findById(_id);
+	console.log(user);
 	return user;
 };
 
