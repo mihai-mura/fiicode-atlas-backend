@@ -47,7 +47,7 @@ export const getProfilePictureUrl = async (_id) => {
 };
 
 export const updateUserIdPicUrl = async (_id, idPicUrl) => {
-	await UserModel.findByIdAndUpdate(_id, { 'address.id_url': idPicUrl }); //! problem here
+	await UserModel.findByIdAndUpdate(_id, { 'address.id_url': idPicUrl });
 };
 
 export const createPost = async (title, description, user, city) => {
