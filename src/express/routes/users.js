@@ -6,6 +6,7 @@ import { authorize, verifyToken } from '../middleware.js';
 import { writeFileIdPicture } from '../../database/fileStorage/multerStuff.js';
 import firebaseBucket from '../../database/fileStorage/firebase/firebaseStorage.js';
 import { createPersistentDownloadUrl } from '../../database/fileStorage/firebase/firebaseStorage.js';
+import ROLE from '../roles.js';
 
 const router = express.Router();
 
@@ -19,7 +20,7 @@ router.post('/register', async (req, res) => {
 			req.body.lastName,
 			req.body.city,
 			req.body.address,
-			'user'
+			ROLE.USER
 		);
 		if (user === 11000) {
 			//* duplicate error
