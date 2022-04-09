@@ -119,11 +119,7 @@ router.get('/', verifyToken, async (req, res) => {
 // });
 router.get('/profile-pic/:id', async (req, res) => {
 	const url = await getProfilePictureUrl(req.params.id);
-	if (url) {
-		res.send(url);
-	} else {
-		res.sendStatus(204);
-	}
+	res.send(url);
 });
 
 export default router;
