@@ -22,7 +22,7 @@ const userSchema = new mongoose.Schema(
 		city: { type: String, required: true },
 		address: { type: addressSchema, default: null },
 		profile_pic_url: { type: String, default: null },
-		role: { type: String, required: true }, //  user | moderator | local-admin
+		role: { type: String, required: true }, //*  user | moderator | local-admin
 	},
 	{
 		versionKey: false,

@@ -1,7 +1,14 @@
 import express from 'express';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
-import { createUser, getProfilePictureUrl, getUserById, getUserByEmail, updateUserIdPicUrl } from '../../database/mongoStuff.js';
+import {
+	createUser,
+	getProfilePictureUrl,
+	getUserById,
+	getUserByEmail,
+	updateUserIdPicUrl,
+	updateUser,
+} from '../../database/mongoStuff.js';
 import { authorize, verifyToken } from '../middleware.js';
 import { writeFileIdPicture } from '../../database/fileStorage/multerStuff.js';
 import firebaseBucket from '../../database/fileStorage/firebase/firebaseStorage.js';
@@ -121,6 +128,30 @@ router.get('/', verifyToken, async (req, res) => {
 router.get('/profile-pic/:id', async (req, res) => {
 	const url = await getProfilePictureUrl(req.params.id);
 	res.send(url);
+});
+
+router.put('/:field', verifyToken, async (req, res) => {
+	//* field types: first-name | last-name | address | password
+	try {
+		const dbResponse = await updateUser(req._id, req.params.field, req.body.value);
+		switch (dbResponse) {
+			case 1:
+				res.sendStatus(200);
+				break;
+			case 0:
+				res.sendStatus(404);
+				break;
+			case 2:
+				res.sendStatus(400);
+				break;
+			default:
+				res.sendStatus(500);
+				break;
+		}
+	} catch (error) {
+		console.log(error);
+		res.sendStatus(500);
+	}
 });
 
 export default router;

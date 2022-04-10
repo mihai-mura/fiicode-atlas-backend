@@ -1,6 +1,7 @@
 import UserModel from './models/UserModel.js';
 import PostModel from './models/PostModel.js';
 import createProfilePic from './fileStorage/profilePictures/createProfilePic.js';
+import bcrypt from 'bcrypt';
 
 export const createUser = async (email, password, firstName, lastName, city, addressName, role) => {
 	try {
@@ -16,7 +17,6 @@ export const createUser = async (email, password, firstName, lastName, city, add
 			address: { name: addressName },
 			role: role,
 		});
-		console.log(createdUser);
 		const profilePicURL = await createProfilePic(createdUser._id, createdUser.first_name, createdUser.last_name);
 		await UserModel.findByIdAndUpdate(createdUser._id, { profile_pic_url: profilePicURL });
 		return createdUser;
@@ -28,7 +28,6 @@ export const createUser = async (email, password, firstName, lastName, city, add
 
 export const getUserById = async (_id) => {
 	const user = await UserModel.findById(_id);
-	console.log(user);
 	return user;
 };
 
@@ -51,18 +50,36 @@ export const updateUserIdPicUrl = async (_id, idPicUrl) => {
 	await UserModel.findByIdAndUpdate(_id, { 'address.id_url': idPicUrl });
 };
 
-export const createPost = async (title, description, user, city) => {
-	try {
-		const createdPost = await PostModel.create({
-			title: title,
-			description: description,
-			user: user,
-			city: city,
-			status: 'sent',
-		});
-		return 1;
-	} catch (error) {
-		console.log(error);
-		return 0;
+export const updateUser = async (_id, field, data) => {
+	switch (field) {
+		case 'first-name':
+			await UserModel.findByIdAndUpdate(_id, { first_name: data.charAt(0).toUpperCase() + data.slice(1) });
+			return 1;
+		case 'last-name':
+			await UserModel.findByIdAndUpdate(_id, { last_name: data.charAt(0).toUpperCase() + data.slice(1) });
+			return 1;
+		case 'address':
+			await UserModel.findByIdAndUpdate(_id, { ['address.name']: data });
+			return 1;
+		case 'password':
+			if (data.length < 8) {
+				return 2; //password too short
+			} else {
+				const hashedPass = await bcrypt.hash(data, 10);
+				await UserModel.findByIdAndUpdate(_id, { password: hashedPass });
+				return 1;
+			}
+		default:
+			return 0;
 	}
+};
+
+export const createPost = async (title, description, user, city) => {
+	const createdPost = await PostModel.create({
+		title: title,
+		description: description,
+		user: user,
+		city: city,
+		status: 'sent',
+	});
 };
