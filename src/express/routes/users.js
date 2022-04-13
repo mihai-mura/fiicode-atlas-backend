@@ -127,8 +127,17 @@ router.get('/', verifyToken, async (req, res) => {
 // 	res.sendFile(`${process.env.PROFILE_PIC_PATH}/${_id}.jpg`);
 // });
 router.get('/profile-pic/:id', async (req, res) => {
-	const url = await getProfilePictureUrl(req.params.id);
-	res.send(url);
+	try {
+		if (req.params.id === 'undefined') {
+			res.sendStatus(400);
+		} else {
+			const url = await getProfilePictureUrl(req.params.id);
+			res.send(url);
+		}
+	} catch (error) {
+		console.log(error);
+		res.sendStatus(500);
+	}
 });
 
 router.put('/:field', verifyToken, async (req, res) => {
