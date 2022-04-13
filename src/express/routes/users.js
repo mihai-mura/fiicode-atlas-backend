@@ -14,6 +14,7 @@ import { writeFileIdPicture } from '../../database/fileStorage/multerStuff.js';
 import firebaseBucket from '../../database/fileStorage/firebase/firebaseStorage.js';
 import { createPersistentDownloadUrl } from '../../database/fileStorage/firebase/firebaseStorage.js';
 import ROLE from '../roles.js';
+import { sendPassRecoverMail } from '../../mail/mail.js';
 
 const router = express.Router();
 
@@ -152,6 +153,21 @@ router.put('/:field', verifyToken, async (req, res) => {
 		console.log(error);
 		res.sendStatus(500);
 	}
+});
+
+router.post('/recover-pass', async (req, res) => {
+	const user = await getUserByEmail(req.body.email);
+	if (user) {
+		const token = jwt.sign(
+			{
+				_id: user._id,
+			},
+			process.env.JWT_SECRET,
+			{ expiresIn: '1d' }
+		);
+		await sendPassRecoverMail(user.email, token);
+		res.sendStatus(200);
+	} else res.sendStatus(404);
 });
 
 export default router;
