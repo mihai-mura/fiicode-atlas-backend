@@ -16,7 +16,7 @@ export const sendPassRecoverMail = async (to, link) => {
 		from: process.env.EMAIL_USER,
 		to: to,
 		subject: 'Password Recovery',
-		text: `Click this link to recover your password: http://localhost:3000/recover/${link}`,
+		text: `Click this link to recover your password: http://localhost:3000/recover-password/${link}`,
 	};
 	await transporter
 		.sendMail(mailOptions)

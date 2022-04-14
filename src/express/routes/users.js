@@ -151,12 +151,11 @@ router.put('/:field', verifyToken, async (req, res) => {
 			case 0:
 				res.sendStatus(404);
 				break;
-			case 2:
+			case 2: //* password too short
 				res.sendStatus(400);
 				break;
 			default:
 				res.sendStatus(500);
-				break;
 		}
 	} catch (error) {
 		console.log(error);
@@ -164,19 +163,51 @@ router.put('/:field', verifyToken, async (req, res) => {
 	}
 });
 
-router.post('/recover-pass', async (req, res) => {
-	const user = await getUserByEmail(req.body.email);
-	if (user) {
-		const token = jwt.sign(
-			{
-				_id: user._id,
-			},
-			process.env.JWT_SECRET,
-			{ expiresIn: '1d' }
-		);
-		await sendPassRecoverMail(user.email, token);
-		res.sendStatus(200);
-	} else res.sendStatus(404);
+router.post('/recover-password', async (req, res) => {
+	try {
+		const user = await getUserByEmail(req.body.email);
+		if (user) {
+			const token = jwt.sign(
+				{
+					_id: user._id,
+				},
+				process.env.JWT_SECRET,
+				{ expiresIn: '1d' }
+			);
+			await sendPassRecoverMail(user.email, token);
+			res.sendStatus(200);
+		} else res.sendStatus(404);
+	} catch (error) {
+		console.log(error);
+		res.sendStatus(500);
+	}
+});
+
+//verifies if token expired
+router.get('/reset-password-valid', verifyToken, async (req, res) => {
+	res.sendStatus(200);
+});
+
+router.post('/reset-password', verifyToken, async (req, res) => {
+	try {
+		const dbResponse = await updateUser(req._id, 'password', req.body.value);
+		switch (dbResponse) {
+			case 1:
+				res.sendStatus(200);
+				break;
+			case 0:
+				res.sendStatus(404);
+				break;
+			case 2: //* password too short
+				res.sendStatus(400);
+				break;
+			default:
+				res.sendStatus(500);
+		}
+	} catch (error) {
+		console.log(error);
+		res.sendStatus(500);
+	}
 });
 
 export default router;
