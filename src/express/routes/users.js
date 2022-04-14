@@ -163,7 +163,7 @@ router.put('/:field', verifyToken, async (req, res) => {
 	}
 });
 
-router.post('/recover-password', async (req, res) => {
+router.post('/restore-password-email', async (req, res) => {
 	try {
 		const user = await getUserByEmail(req.body.email);
 		if (user) {
@@ -184,13 +184,14 @@ router.post('/recover-password', async (req, res) => {
 });
 
 //verifies if token expired
-router.get('/reset-password-valid', verifyToken, async (req, res) => {
+router.get('/restore-password-valid', verifyToken, async (req, res) => {
 	res.sendStatus(200);
 });
 
-router.post('/reset-password', verifyToken, async (req, res) => {
+router.post('/restore-password', verifyToken, async (req, res) => {
+	//!revoke token after use
 	try {
-		const dbResponse = await updateUser(req._id, 'password', req.body.value);
+		const dbResponse = await updateUser(req._id, 'password', req.body.password);
 		switch (dbResponse) {
 			case 1:
 				res.sendStatus(200);
