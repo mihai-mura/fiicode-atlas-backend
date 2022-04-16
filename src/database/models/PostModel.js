@@ -6,9 +6,10 @@ const postSchema = new mongoose.Schema(
 		description: { type: String, required: true },
 		user: { type: String, required: true },
 		city: { type: String, required: true },
+		status: { type: String, default: 'sent' }, //sent | seen | in-progress | resolved
 		upvotes: { type: Number, default: 0 },
 		downvotes: { type: Number, default: 0 },
-		status: { type: String, required: true }, //sent | seen | in-progress | resolved
+		file_urls: { type: Array, default: [] },
 	},
 	{
 		collection: 'posts',

@@ -80,6 +80,15 @@ export const createPost = async (title, description, user, city) => {
 		description: description,
 		user: user,
 		city: city,
-		status: 'sent',
 	});
+	return createdPost;
+};
+
+export const addPostFileUrls = async (_id, url) => {
+	await PostModel.findByIdAndUpdate(_id, { $push: { file_urls: url } });
+};
+
+export const deletePostFileUrls = async (_id) => {
+	const post = await PostModel.findByIdAndUpdate(_id, { file_urls: [] });
+	return post;
 };

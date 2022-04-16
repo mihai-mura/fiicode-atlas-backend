@@ -189,7 +189,6 @@ router.get('/restore-password-valid', verifyToken, async (req, res) => {
 });
 
 router.post('/restore-password', verifyToken, async (req, res) => {
-	//!revoke token after use
 	try {
 		const dbResponse = await updateUser(req._id, 'password', req.body.password);
 		switch (dbResponse) {
