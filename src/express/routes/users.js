@@ -121,6 +121,17 @@ router.get('/', verifyToken, async (req, res) => {
 	}
 });
 
+//for post user
+router.get('/:id/full-name', async (req, res) => {
+	try {
+		const user = await getUserById(req.params.id);
+		res.send({ firstName: user.first_name, lastName: user.last_name });
+	} catch (error) {
+		console.log(error);
+		res.sendStatus(500);
+	}
+});
+
 //* for local storage
 // router.get('/profile-pic/:id', (req, res) => {
 // 	const _id = req.params.id;

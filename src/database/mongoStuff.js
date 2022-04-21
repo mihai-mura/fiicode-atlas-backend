@@ -92,3 +92,8 @@ export const deletePostFileUrls = async (_id) => {
 	const post = await PostModel.findByIdAndUpdate(_id, { file_urls: [] });
 	return post;
 };
+
+export const getPosts = async () => {
+	const posts = await PostModel.find({});
+	return posts;
+};

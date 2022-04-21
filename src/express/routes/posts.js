@@ -1,6 +1,6 @@
 import express from 'express';
 import { verifyToken } from '../middleware.js';
-import { addPostFileUrls, createPost, deletePostFileUrls } from '../../database/mongoStuff.js';
+import { addPostFileUrls, createPost, deletePostFileUrls, getPosts } from '../../database/mongoStuff.js';
 import { writeFilesPostContent } from '../../database/fileStorage/multerStuff.js';
 import firebaseBucket, { createPersistentDownloadUrl } from '../../database/fileStorage/firebase/firebaseStorage.js';
 
@@ -43,6 +43,16 @@ router.post('/create/files/:postId', verifyToken, writeFilesPostContent.any(), a
 		} else {
 			res.sendStatus(400);
 		}
+	} catch (error) {
+		console.log(error);
+		res.sendStatus(500);
+	}
+});
+
+router.get('/all', async (req, res) => {
+	try {
+		const posts = await getPosts();
+		res.send(posts);
 	} catch (error) {
 		console.log(error);
 		res.sendStatus(500);
