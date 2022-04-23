@@ -51,6 +51,8 @@ router.post('/register', async (req, res) => {
 					city: user.city,
 					address: user.address.name,
 					role: user.role,
+					upvotedPosts: user.upvoted_posts,
+					downvotedPosts: user.downvoted_posts,
 				},
 			});
 		}
@@ -93,6 +95,8 @@ router.post('/login', async (req, res) => {
 						city: user.city,
 						address: user.address.name,
 						role: user.role,
+						upvotedPosts: user.upvoted_posts,
+						downvotedPosts: user.downvoted_posts,
 					},
 				});
 			} else res.sendStatus(403);
