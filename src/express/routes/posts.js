@@ -1,8 +1,16 @@
 import express from 'express';
-import { verifyToken } from '../middleware.js';
-import { addPostFileUrls, createPost, deletePostFileUrls, getPosts } from '../../database/mongoStuff.js';
+import { authorize, verifyToken } from '../middleware.js';
+import {
+	addPostFileUrls,
+	createPost,
+	deletePostFileUrls,
+	downvotePost,
+	getPosts,
+	upvotePost,
+} from '../../database/mongoStuff.js';
 import { writeFilesPostContent } from '../../database/fileStorage/multerStuff.js';
 import firebaseBucket, { createPersistentDownloadUrl } from '../../database/fileStorage/firebase/firebaseStorage.js';
+import ROLE from '../roles.js';
 
 const router = express.Router();
 
@@ -43,6 +51,41 @@ router.post('/create/files/:postId', verifyToken, writeFilesPostContent.any(), a
 		} else {
 			res.sendStatus(400);
 		}
+	} catch (error) {
+		console.log(error);
+		res.sendStatus(500);
+	}
+});
+
+router.put('/upvote/:postId', verifyToken, authorize(ROLE.USER), async (req, res) => {
+	try {
+		const dbResponse = await upvotePost(req.params.postId, req._id); //returns 0 if post isn't found and -1 if user already upvoted
+		if (dbResponse === 0) {
+			res.sendStatus(404);
+			return;
+		}
+		if (dbResponse === -1) {
+			res.sendStatus(204); // when upvote is removed
+			return;
+		}
+		res.sendStatus(200);
+	} catch (error) {
+		console.log(error);
+		res.sendStatus(500);
+	}
+});
+router.put('/downvote/:postId', verifyToken, authorize(ROLE.USER), async (req, res) => {
+	try {
+		const dbResponse = await downvotePost(req.params.postId, req._id); //returns 0 if post isn't found and -1 if user already downvoted
+		if (dbResponse === 0) {
+			res.sendStatus(404);
+			return;
+		}
+		if (dbResponse === -1) {
+			res.sendStatus(204); // when downvote is removed
+			return;
+		}
+		res.sendStatus(200);
 	} catch (error) {
 		console.log(error);
 		res.sendStatus(500);

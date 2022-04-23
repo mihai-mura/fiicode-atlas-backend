@@ -22,6 +22,12 @@ export const writeFileIdPicture = multer({
 		fileSize: 1000000,
 	},
 });
+export const writeFileProfilePicture = multer({
+	storage: multer.memoryStorage(),
+	limits: {
+		fileSize: 1000000,
+	},
+});
 
 export const writeFilesPostContent = multer({
 	storage: multer.memoryStorage(),

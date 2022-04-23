@@ -10,7 +10,7 @@ import {
 	updateUser,
 } from '../../database/mongoStuff.js';
 import { authorize, verifyToken } from '../middleware.js';
-import { writeFileIdPicture } from '../../database/fileStorage/multerStuff.js';
+import { writeFileIdPicture, writeFileProfilePicture } from '../../database/fileStorage/multerStuff.js';
 import firebaseBucket from '../../database/fileStorage/firebase/firebaseStorage.js';
 import { createPersistentDownloadUrl } from '../../database/fileStorage/firebase/firebaseStorage.js';
 import ROLE from '../roles.js';
@@ -145,6 +145,16 @@ router.get('/profile-pic/:id', async (req, res) => {
 			const url = await getProfilePictureUrl(req.params.id);
 			res.send(url);
 		}
+	} catch (error) {
+		console.log(error);
+		res.sendStatus(500);
+	}
+});
+
+router.put('/profile-pic', verifyToken, writeFileProfilePicture.single('profile-pic'), async (req, res) => {
+	try {
+		firebaseBucket.file(`user-profilePics/${req._id}.jpg`).save(req.file.buffer);
+		res.sendStatus(200);
 	} catch (error) {
 		console.log(error);
 		res.sendStatus(500);

@@ -22,6 +22,8 @@ const userSchema = new mongoose.Schema(
 		city: { type: String, required: true },
 		address: { type: addressSchema, default: null },
 		profile_pic_url: { type: String, default: null },
+		upvoted_posts: { type: [String], default: [] },
+		downvoted_posts: { type: [String], default: [] },
 		role: { type: String, required: true }, //*  user | moderator | local-admin
 	},
 	{
