@@ -114,6 +114,8 @@ router.get('/', verifyToken, async (req, res) => {
 			city: user.city,
 			address: user.address.name,
 			role: user.role,
+			upvotedPosts: user.upvoted_posts,
+			downvotedPosts: user.downvoted_posts,
 		});
 	} catch (error) {
 		console.log(error);

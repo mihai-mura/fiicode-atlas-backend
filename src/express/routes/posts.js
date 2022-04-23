@@ -57,35 +57,46 @@ router.post('/create/files/:postId', verifyToken, writeFilesPostContent.any(), a
 	}
 });
 
+//this route can also be called to remove upvotes
 router.put('/upvote/:postId', verifyToken, authorize(ROLE.USER), async (req, res) => {
 	try {
-		const dbResponse = await upvotePost(req.params.postId, req._id); //returns 0 if post isn't found and -1 if user already upvoted
-		if (dbResponse === 0) {
-			res.sendStatus(404);
-			return;
+		const dbResponse = await upvotePost(req.params.postId, req._id);
+		switch (dbResponse) {
+			case 0:
+				res.sendStatus(404);
+				break;
+			case -1:
+				res.send('removed upvote');
+				break;
+			case 1:
+				res.send('added upvote and removed downvote');
+				break;
+			default:
+				res.send('added upvote');
 		}
-		if (dbResponse === -1) {
-			res.sendStatus(204); // when upvote is removed
-			return;
-		}
-		res.sendStatus(200);
 	} catch (error) {
 		console.log(error);
 		res.sendStatus(500);
 	}
 });
+
+//this route can also be called to remove downvotes
 router.put('/downvote/:postId', verifyToken, authorize(ROLE.USER), async (req, res) => {
 	try {
-		const dbResponse = await downvotePost(req.params.postId, req._id); //returns 0 if post isn't found and -1 if user already downvoted
-		if (dbResponse === 0) {
-			res.sendStatus(404);
-			return;
+		const dbResponse = await downvotePost(req.params.postId, req._id);
+		switch (dbResponse) {
+			case 0:
+				res.sendStatus(404);
+				break;
+			case -1:
+				res.send('removed downvote');
+				break;
+			case 1:
+				res.send('added downvote and removed upvote');
+				break;
+			default:
+				res.send('added downvote');
 		}
-		if (dbResponse === -1) {
-			res.sendStatus(204); // when downvote is removed
-			return;
-		}
-		res.sendStatus(200);
 	} catch (error) {
 		console.log(error);
 		res.sendStatus(500);

@@ -93,20 +93,24 @@ export const addPostFileUrls = async (_id, url) => {
 	await PostModel.findByIdAndUpdate(_id, { $push: { file_urls: url } });
 };
 
+//* returns 0 if no post found | 1 if added upvote and removed downvote | -1 if already upvoted and has removed the upvote
 export const upvotePost = async (postId, user) => {
-	const res = await PostModel.findByIdAndUpdate(postId, { $push: { upvotes: user } });
-	if (!res) {
-		return 0; // post doesn't exist
+	const post = await PostModel.findById(postId);
+	if (!post) {
+		return 0;
 	}
 	//find if user has already upvoted
-	if (res.upvotes.includes(user)) {
+	if (post.upvotes.includes(user)) {
 		//remove upvote
 		await PostModel.findByIdAndUpdate(postId, { $pull: { upvotes: user } });
 		await UserModel.findByIdAndUpdate(user, { $pull: { upvoted_posts: postId } });
-		return -1; //already upvoted
+		return -1;
 	}
+	//add post id to user's upvoted posts and user id to post's upvotes
+	await PostModel.findByIdAndUpdate(postId, { $push: { upvotes: user } });
+	await UserModel.findByIdAndUpdate(user, { $push: { upvoted_posts: postId } });
+
 	//find if user has downvoted post
-	const post = await PostModel.findById(postId);
 	const downvotes = post.downvotes;
 	const index = downvotes.indexOf(user);
 	if (index > -1) {
@@ -114,25 +118,28 @@ export const upvotePost = async (postId, user) => {
 		await PostModel.findByIdAndUpdate(postId, { downvotes: downvotes });
 		//remove post from user's downvoted posts
 		await UserModel.findByIdAndUpdate(user, { $pull: { downvoted_posts: postId } });
+		return 1;
 	}
-	//add post id to user's upvoted posts
-	await UserModel.findByIdAndUpdate(user, { $push: { upvoted_posts: postId } });
 };
 
+//* returns 0 if no post found | 1 if added upvote and removed downvote | -1 if already upvoted and has removed the upvote
 export const downvotePost = async (postId, user) => {
-	const res = await PostModel.findByIdAndUpdate(postId, { $push: { downvotes: user } });
-	if (!res) {
-		return 0; // post doesn't exist
+	const post = await PostModel.findById(postId);
+	if (!post) {
+		return 0;
 	}
 	//find if user has already downvoted
-	if (res.downvotes.includes(user)) {
+	if (post.downvotes.includes(user)) {
 		//remove downvote
 		await PostModel.findByIdAndUpdate(postId, { $pull: { downvotes: user } });
 		await UserModel.findByIdAndUpdate(user, { $pull: { downvoted_posts: postId } });
-		return -1; //already downvoted
+		return -1;
 	}
+	//add post id to user's downvoted posts
+	await UserModel.findByIdAndUpdate(user, { $push: { downvoted_posts: postId } });
+	await PostModel.findByIdAndUpdate(postId, { $push: { downvotes: user } });
+
 	//find if user has upvoted post
-	const post = await PostModel.findById(postId);
 	const upvotes = post.upvotes;
 	const index = upvotes.indexOf(user);
 	if (index > -1) {
@@ -140,9 +147,8 @@ export const downvotePost = async (postId, user) => {
 		await PostModel.findByIdAndUpdate(postId, { upvotes: upvotes });
 		//remove post from user's upvoted posts
 		await UserModel.findByIdAndUpdate(user, { $pull: { upvoted_posts: postId } });
+		return 1;
 	}
-	//add post id to user's downvoted posts
-	await UserModel.findByIdAndUpdate(user, { $push: { downvoted_posts: postId } });
 };
 
 export const deletePostFileUrls = async (_id) => {
