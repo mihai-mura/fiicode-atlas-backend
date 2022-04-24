@@ -2,6 +2,7 @@ import UserModel from './models/UserModel.js';
 import PostModel from './models/PostModel.js';
 import createProfilePic from './fileStorage/profilePictures/createProfilePic.js';
 import bcrypt from 'bcrypt';
+import ROLE from '../express/roles.js';
 
 export const createUser = async (email, password, firstName, lastName, city, addressName, role) => {
 	try {
@@ -73,6 +74,38 @@ export const updateUser = async (_id, field, data) => {
 			return 0;
 	}
 };
+
+//----------------------------------------------------------------------------------------------
+
+export const createGeneralAdmin = async (email, password, firstName, lastName) => {
+	//find if general admin already exists
+	const generalAdmin = await UserModel.findOne({ role: ROLE.GENERAL_ADMIN });
+	if (generalAdmin) {
+		return null;
+	} else {
+		const upperFirstName = firstName.charAt(0).toUpperCase() + firstName.slice(1);
+		const upperLastName = lastName.charAt(0).toUpperCase() + lastName.slice(1);
+		const createdUser = await UserModel.create({
+			email: email,
+			password: password,
+			first_name: upperFirstName,
+			last_name: upperLastName,
+			upvoted_posts: null,
+			downvoted_posts: null,
+			role: ROLE.GENERAL_ADMIN,
+		});
+		const profilePicURL = await createProfilePic(createdUser._id, createdUser.first_name, createdUser.last_name);
+		await UserModel.findByIdAndUpdate(createdUser._id, { profile_pic_url: profilePicURL });
+		return createdUser;
+	}
+};
+
+export const getGeneralAdmin = async () => {
+	const generalAdmin = await UserModel.findOne({ role: ROLE.GENERAL_ADMIN });
+	return generalAdmin;
+};
+
+//----------------------------------------------------------------------------------------------
 
 export const createPost = async (title, description, user, city) => {
 	const createdPost = await PostModel.create({

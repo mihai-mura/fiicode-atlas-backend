@@ -4,6 +4,7 @@ import mongoose from 'mongoose';
 import express from 'express';
 import userRouter from './src/express/routes/users.js';
 import postRouter from './src/express/routes/posts.js';
+import generalAdminRouter from './src/express/routes/generalAdmin.js';
 
 dotenv.config();
 
@@ -24,3 +25,4 @@ app.use(express.json());
 //routes
 app.use('/users', userRouter);
 app.use('/posts', postRouter);
+app.use('/general-admin', generalAdminRouter);

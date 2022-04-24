@@ -19,7 +19,7 @@ const userSchema = new mongoose.Schema(
 		password: { type: String, required: true },
 		first_name: { type: String, required: true },
 		last_name: { type: String, required: true },
-		city: { type: String, required: true },
+		city: { type: String, default: null },
 		address: { type: addressSchema, default: null },
 		profile_pic_url: { type: String, default: null },
 		upvoted_posts: { type: [String], default: [] },
