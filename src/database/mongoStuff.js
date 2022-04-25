@@ -107,6 +107,47 @@ export const getGeneralAdmin = async () => {
 
 //----------------------------------------------------------------------------------------------
 
+//returns 0 if admin exists on specified city | 1 if admin created | -1 if admin with same email already exists | null if error
+export const createAdmin = async (email, password, firstName, lastName, city) => {
+	//verify if admin  with that city already exists
+	const localAdmin = await UserModel.findOne({ role: ROLE.LOCAL_ADMIN, city: city });
+	if (localAdmin) {
+		return 0;
+	} else {
+		const upperFirstName = firstName.charAt(0).toUpperCase() + firstName.slice(1);
+		const upperLastName = lastName.charAt(0).toUpperCase() + lastName.slice(1);
+		try {
+			const createdUser = await UserModel.create({
+				email: email,
+				password: password,
+				first_name: upperFirstName,
+				last_name: upperLastName,
+				upvoted_posts: null,
+				downvoted_posts: null,
+				role: ROLE.LOCAL_ADMIN,
+				city: city,
+			});
+			const profilePicURL = await createProfilePic(createdUser._id, createdUser.first_name, createdUser.last_name);
+			await UserModel.findByIdAndUpdate(createdUser._id, { profile_pic_url: profilePicURL });
+			return 1;
+		} catch (error) {
+			console.log(error);
+			if (error.code === 11000) {
+				return -1;
+			} else {
+				return null;
+			}
+		}
+	}
+};
+
+export const getAllAdmins = async () => {
+	const admins = await UserModel.find({ role: ROLE.LOCAL_ADMIN });
+	return admins;
+};
+
+//----------------------------------------------------------------------------------------------
+
 export const createPost = async (title, description, user, city) => {
 	const createdPost = await PostModel.create({
 		title: title,
