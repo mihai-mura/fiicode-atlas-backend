@@ -3,6 +3,7 @@ import { authorize, verifyToken } from '../middleware.js';
 import ROLE from '../roles.js';
 import bcrypt from 'bcrypt';
 import { createAdmin, deleteAdmin, getAllAdmins } from '../../database/mongoStuff.js';
+import firebaseBucket from '../../database/fileStorage/firebase/firebaseStorage.js';
 
 const router = express.Router();
 
@@ -42,6 +43,7 @@ router.get('/all', verifyToken, authorize(ROLE.GENERAL_ADMIN), async (req, res) 
 router.delete('/:id', verifyToken, authorize(ROLE.GENERAL_ADMIN), async (req, res) => {
 	try {
 		const dbResponse = await deleteAdmin(req.params.id);
+		await firebaseBucket.file(`user-profilePics/${req.params.id}.jpg`).delete();
 		if (dbResponse.deletedCount !== 0) res.sendStatus(200);
 		else res.sendStatus(404);
 	} catch (error) {
