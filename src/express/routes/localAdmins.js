@@ -2,11 +2,11 @@ import express from 'express';
 import { authorize, verifyToken } from '../middleware.js';
 import ROLE from '../roles.js';
 import bcrypt from 'bcrypt';
-import { createAdmin, getAllAdmins } from '../../database/mongoStuff.js';
+import { createAdmin, deleteAdmin, getAllAdmins } from '../../database/mongoStuff.js';
 
 const router = express.Router();
 
-router.post('/create', verifyToken, authorize(ROLE.GENERAL_ADMIN), async (req, res) => {
+router.post('/', verifyToken, authorize(ROLE.GENERAL_ADMIN), async (req, res) => {
 	const hashedPass = await bcrypt.hash(req.body.password, 10);
 	const dbResponse = await createAdmin(req.body.email, hashedPass, req.body.firstName, req.body.lastName, req.body.city);
 	if (dbResponse === 1) {
@@ -25,6 +25,7 @@ router.get('/all', verifyToken, authorize(ROLE.GENERAL_ADMIN), async (req, res) 
 		const admins = await getAllAdmins();
 		res.send(
 			admins.map((admin) => ({
+				_id: admin._id,
 				email: admin.email,
 				firstName: admin.first_name,
 				lastName: admin.last_name,
@@ -32,6 +33,17 @@ router.get('/all', verifyToken, authorize(ROLE.GENERAL_ADMIN), async (req, res) 
 				profileImg: admin.profile_pic_url,
 			}))
 		);
+	} catch (error) {
+		console.log(error);
+		res.sendStatus(500);
+	}
+});
+
+router.delete('/:id', verifyToken, authorize(ROLE.GENERAL_ADMIN), async (req, res) => {
+	try {
+		const dbResponse = await deleteAdmin(req.params.id);
+		if (dbResponse.deletedCount !== 0) res.sendStatus(200);
+		else res.sendStatus(404);
 	} catch (error) {
 		console.log(error);
 		res.sendStatus(500);

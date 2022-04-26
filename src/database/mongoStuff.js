@@ -1,6 +1,6 @@
 import UserModel from './models/UserModel.js';
 import PostModel from './models/PostModel.js';
-import createProfilePic from './fileStorage/profilePictures/createProfilePic.js';
+import createProfilePic from './fileStorage/createProfilePic.js';
 import bcrypt from 'bcrypt';
 import ROLE from '../express/roles.js';
 
@@ -144,6 +144,11 @@ export const createAdmin = async (email, password, firstName, lastName, city) =>
 export const getAllAdmins = async () => {
 	const admins = await UserModel.find({ role: ROLE.LOCAL_ADMIN });
 	return admins;
+};
+
+export const deleteAdmin = async (_id) => {
+	const res = await UserModel.deleteOne({ _id });
+	return res;
 };
 
 //----------------------------------------------------------------------------------------------

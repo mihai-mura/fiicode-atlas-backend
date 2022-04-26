@@ -1,7 +1,7 @@
 import nodeCanvas from 'canvas';
-import firebaseBucket from '../firebase/firebaseStorage.js';
 import fs from 'fs';
-import { createPersistentDownloadUrl } from '../firebase/firebaseStorage.js';
+import firebaseBucket from './firebase/firebaseStorage.js';
+import { createPersistentDownloadUrl } from './firebase/firebaseStorage.js';
 
 //default bgc for profile pictures
 const colors = [
