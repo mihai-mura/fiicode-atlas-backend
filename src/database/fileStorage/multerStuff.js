@@ -19,7 +19,7 @@ const idStorage = multer.diskStorage({
 export const writeFileIdPicture = multer({
 	storage: multer.memoryStorage(),
 	limits: {
-		fileSize: 3145728, //3mb
+		fileSize: 3145728, //.5mb
 	},
 });
 export const writeFileProfilePicture = multer({

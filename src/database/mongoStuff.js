@@ -47,6 +47,22 @@ export const getProfilePictureUrl = async (_id) => {
 	return url.profile_pic_url;
 };
 
+export const getUnverifiedUsers = async (city) => {
+	const users = await UserModel.find({ 'address.verified': false, city }).select({
+		email: 1,
+		first_name: 1,
+		last_name: 1,
+		address: 1,
+		profile_pic_url: 1,
+	});
+	return users;
+};
+
+export const isVerified = async (_id) => {
+	const user = await UserModel.findById(_id).select({ address: 1 });
+	return user.address.verified;
+};
+
 export const updateUserIdPicUrl = async (_id, idPicUrl) => {
 	await UserModel.findByIdAndUpdate(_id, { 'address.id_url': idPicUrl });
 };
@@ -60,7 +76,7 @@ export const updateUser = async (_id, field, data) => {
 			await UserModel.findByIdAndUpdate(_id, { last_name: data.charAt(0).toUpperCase() + data.slice(1) });
 			return 1;
 		case 'address':
-			await UserModel.findByIdAndUpdate(_id, { ['address.name']: data });
+			await UserModel.findByIdAndUpdate(_id, { 'address.name': data });
 			return 1;
 		case 'password':
 			if (data.length < 8) {
@@ -70,6 +86,10 @@ export const updateUser = async (_id, field, data) => {
 				await UserModel.findByIdAndUpdate(_id, { password: hashedPass });
 				return 1;
 			}
+		case 'verified':
+			await UserModel.findByIdAndUpdate(_id, { 'address.verified': true });
+			await UserModel.findByIdAndUpdate(_id, { 'address.id_url': '' });
+			return 1;
 		default:
 			return 0;
 	}
@@ -185,8 +205,8 @@ export const createModerator = async (email, password, firstName, lastName, city
 	}
 };
 
-export const getAllModerators = async () => {
-	const admins = await UserModel.find({ role: ROLE.MODERATOR });
+export const getAllModerators = async (city) => {
+	const admins = await UserModel.find({ role: ROLE.MODERATOR, city });
 	return admins;
 };
 

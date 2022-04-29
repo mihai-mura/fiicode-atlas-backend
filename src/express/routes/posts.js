@@ -6,6 +6,7 @@ import {
 	deletePostFileUrls,
 	downvotePost,
 	getPosts,
+	isVerified,
 	upvotePost,
 } from '../../database/mongoStuff.js';
 import { writeFilesPostContent } from '../../database/fileStorage/multerStuff.js';
@@ -16,9 +17,14 @@ const router = express.Router();
 
 router.post('/create', verifyToken, async (req, res) => {
 	try {
-		const dbResponse = await createPost(req.body.title, req.body.description, req._id, req.body.city);
-		if (dbResponse) res.status(201).send({ postId: dbResponse._id });
-		else res.sendStatus(500);
+		//check if user is verified
+		const verified = await isVerified(req._id);
+		if (!verified) res.sendStatus(401);
+		else {
+			const dbResponse = await createPost(req.body.title, req.body.description, req._id, req.body.city);
+			if (dbResponse) res.status(201).send({ postId: dbResponse._id });
+			else res.sendStatus(500);
+		}
 	} catch (error) {
 		console.log(error);
 		res.sendStatus(500);

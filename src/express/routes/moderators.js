@@ -27,7 +27,8 @@ router.post('/', verifyToken, authorize(ROLE.LOCAL_ADMIN), async (req, res) => {
 
 router.get('/all', verifyToken, authorize([ROLE.LOCAL_ADMIN, ROLE.GENERAL_ADMIN]), async (req, res) => {
 	try {
-		const moderators = await getAllModerators();
+		const city = await getAdminCity(req._id);
+		const moderators = await getAllModerators(city);
 		res.send(
 			moderators.map((moderator) => ({
 				_id: moderator._id,

@@ -8,6 +8,8 @@ import {
 	getUserByEmail,
 	updateUserIdPicUrl,
 	updateUser,
+	getUnverifiedUsers,
+	getAdminCity,
 } from '../../database/mongoStuff.js';
 import { authorize, verifyToken } from '../middleware.js';
 import { writeFileIdPicture, writeFileProfilePicture } from '../../database/fileStorage/multerStuff.js';
@@ -50,6 +52,7 @@ router.post('/register', async (req, res) => {
 					lastName: user.last_name,
 					city: user.city,
 					address: user.address.name,
+					verified: user.address.verified,
 					role: user.role,
 					upvotedPosts: user.upvoted_posts,
 					downvotedPosts: user.downvoted_posts,
@@ -93,7 +96,8 @@ router.post('/login', async (req, res) => {
 						firstName: user.first_name,
 						lastName: user.last_name,
 						city: user.city,
-						address: user.address?.name || null,
+						address: user.address?.name,
+						verified: user.address?.verified,
 						role: user.role,
 						upvotedPosts: user.upvoted_posts,
 						downvotedPosts: user.downvoted_posts,
@@ -116,7 +120,8 @@ router.get('/', verifyToken, async (req, res) => {
 			firstName: user.first_name,
 			lastName: user.last_name,
 			city: user.city,
-			address: user.address?.name || null,
+			address: user.address?.name,
+			verified: user.address?.verified,
 			role: user.role,
 			upvotedPosts: user.upvoted_posts,
 			downvotedPosts: user.downvoted_posts,
@@ -132,6 +137,18 @@ router.get('/:id/full-name', async (req, res) => {
 	try {
 		const user = await getUserById(req.params.id);
 		res.send({ firstName: user.first_name, lastName: user.last_name });
+	} catch (error) {
+		console.log(error);
+		res.sendStatus(500);
+	}
+});
+
+//unverified users
+router.get('/unverified/', verifyToken, authorize(ROLE.LOCAL_ADMIN), async (req, res) => {
+	try {
+		const city = await getAdminCity(req._id);
+		const users = await getUnverifiedUsers(city);
+		res.send(users);
 	} catch (error) {
 		console.log(error);
 		res.sendStatus(500);
@@ -184,6 +201,18 @@ router.put('/:field', verifyToken, async (req, res) => {
 			default:
 				res.sendStatus(500);
 		}
+	} catch (error) {
+		console.log(error);
+		res.sendStatus(500);
+	}
+});
+
+router.put('/verify-address/:id', verifyToken, authorize(ROLE.LOCAL_ADMIN), async (req, res) => {
+	try {
+		const dbResponse = await updateUser(req.params.id, 'verified');
+		await firebaseBucket.file(`user-IDs/${req.params.id}.jpg`).delete();
+		if (dbResponse === 1) res.sendStatus(200);
+		else res.sendStatus(500);
 	} catch (error) {
 		console.log(error);
 		res.sendStatus(500);
