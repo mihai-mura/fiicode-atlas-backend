@@ -237,6 +237,11 @@ export const getCityPosts = async (city) => {
 	return posts;
 };
 
+export const getPostByID = async (_id) => {
+	const post = await PostModel.findById(_id);
+	return post;
+};
+
 export const addPostFileUrls = async (_id, url) => {
 	await PostModel.findByIdAndUpdate(_id, { $push: { file_urls: url } });
 };
@@ -297,6 +302,14 @@ export const downvotePost = async (postId, user) => {
 		await UserModel.findByIdAndUpdate(user, { $pull: { upvoted_posts: postId } });
 		return 1;
 	}
+};
+
+export const changePostStatus = async (postId, status) => {
+	const post = await PostModel.findByIdAndUpdate(postId, { status: status });
+	if (!post) {
+		return 0;
+	}
+	return 1;
 };
 
 export const deletePostFileUrls = async (_id) => {

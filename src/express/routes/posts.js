@@ -2,10 +2,12 @@ import express from 'express';
 import { authorize, verifyToken } from '../middleware.js';
 import {
 	addPostFileUrls,
+	changePostStatus,
 	createPost,
 	deletePostFileUrls,
 	downvotePost,
 	getCityPosts,
+	getPostByID,
 	getPosts,
 	isVerified,
 	upvotePost,
@@ -57,6 +59,38 @@ router.post('/create/files/:postId', verifyToken, writeFilesPostContent.any(), a
 			res.sendStatus(200);
 		} else {
 			res.sendStatus(400);
+		}
+	} catch (error) {
+		console.log(error);
+		res.sendStatus(500);
+	}
+});
+
+router.put('/status', verifyToken, authorize(ROLE.LOCAL_ADMIN), async (req, res) => {
+	try {
+		switch (req.body.status) {
+			case 'sent':
+				const dbResponse = await changePostStatus(req.body.id, 'sent');
+				if (dbResponse) res.sendStatus(200);
+				else if (!dbResponse) res.sendStatus(404);
+				break;
+			case 'seen':
+				const dbResponse2 = await changePostStatus(req.body.id, 'seen');
+				if (dbResponse2) res.sendStatus(200);
+				else if (!dbResponse2) res.sendStatus(404);
+				break;
+			case 'in-progress':
+				const dbResponse3 = await changePostStatus(req.body.id, 'in-progress');
+				if (dbResponse3) res.sendStatus(200);
+				else if (!dbResponse3) res.sendStatus(404);
+				break;
+			case 'resolved':
+				const dbResponse4 = await changePostStatus(req.body.id, 'resolved');
+				if (dbResponse4) res.sendStatus(200);
+				else if (!dbResponse4) res.sendStatus(404);
+				break;
+			default:
+				res.sendStatus(400);
 		}
 	} catch (error) {
 		console.log(error);
@@ -124,6 +158,17 @@ router.get('/city/:city', async (req, res) => {
 	try {
 		const posts = await getCityPosts(req.params.city);
 		res.send(posts);
+	} catch (error) {
+		console.log(error);
+		res.sendStatus(500);
+	}
+});
+
+router.get('/:id', async (req, res) => {
+	try {
+		const post = await getPostByID(req.params.id);
+		if (post) res.send(post);
+		else res.sendStatus(404);
 	} catch (error) {
 		console.log(error);
 		res.sendStatus(500);
