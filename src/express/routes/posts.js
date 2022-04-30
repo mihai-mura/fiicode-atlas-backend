@@ -5,6 +5,7 @@ import {
 	createPost,
 	deletePostFileUrls,
 	downvotePost,
+	getCityPosts,
 	getPosts,
 	isVerified,
 	upvotePost,
@@ -112,6 +113,16 @@ router.put('/downvote/:postId', verifyToken, authorize(ROLE.USER), async (req, r
 router.get('/all', async (req, res) => {
 	try {
 		const posts = await getPosts();
+		res.send(posts);
+	} catch (error) {
+		console.log(error);
+		res.sendStatus(500);
+	}
+});
+
+router.get('/city/:city', async (req, res) => {
+	try {
+		const posts = await getCityPosts(req.params.city);
 		res.send(posts);
 	} catch (error) {
 		console.log(error);

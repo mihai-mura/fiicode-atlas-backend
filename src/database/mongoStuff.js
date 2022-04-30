@@ -232,6 +232,11 @@ export const getPosts = async () => {
 	return posts;
 };
 
+export const getCityPosts = async (city) => {
+	const posts = await PostModel.find({ city });
+	return posts;
+};
+
 export const addPostFileUrls = async (_id, url) => {
 	await PostModel.findByIdAndUpdate(_id, { $push: { file_urls: url } });
 };
