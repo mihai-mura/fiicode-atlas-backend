@@ -171,7 +171,8 @@ router.get('/:id', async (req, res) => {
 		else res.sendStatus(404);
 	} catch (error) {
 		console.log(error);
-		res.sendStatus(500);
+		if (error.kind === 'ObjectId') res.sendStatus(404);
+		else res.sendStatus(500);
 	}
 });
 

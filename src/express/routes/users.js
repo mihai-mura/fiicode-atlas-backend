@@ -10,6 +10,7 @@ import {
 	updateUser,
 	getUnverifiedUsers,
 	getAdminCity,
+	deleteUser,
 } from '../../database/mongoStuff.js';
 import { authorize, verifyToken } from '../middleware.js';
 import { writeFileIdPicture, writeFileProfilePicture } from '../../database/fileStorage/multerStuff.js';
@@ -213,6 +214,23 @@ router.put('/verify-address/:id', verifyToken, authorize(ROLE.LOCAL_ADMIN), asyn
 		await firebaseBucket.file(`user-IDs/${req.params.id}.jpg`).delete();
 		if (dbResponse === 1) res.sendStatus(200);
 		else res.sendStatus(500);
+	} catch (error) {
+		console.log(error);
+		res.sendStatus(500);
+	}
+});
+
+router.delete('/deny-address/:id', verifyToken, authorize(ROLE.LOCAL_ADMIN), async (req, res) => {
+	try {
+		const dbResponse = await deleteUser(req.params.id);
+		if (!dbResponse) res.sendStatus(404);
+		else {
+			//delete profile pic and id pic
+			await firebaseBucket.file(`user-profilePics/${req.params.id}.jpg`).delete();
+			await firebaseBucket.file(`user-IDs/${req.params.id}.jpg`).delete();
+			//! send email to user
+			res.sendStatus(200);
+		}
 	} catch (error) {
 		console.log(error);
 		res.sendStatus(500);

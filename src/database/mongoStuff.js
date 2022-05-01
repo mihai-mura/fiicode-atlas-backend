@@ -54,6 +54,7 @@ export const getUnverifiedUsers = async (city) => {
 		last_name: 1,
 		address: 1,
 		profile_pic_url: 1,
+		city: 1,
 	});
 	return users;
 };
@@ -93,6 +94,12 @@ export const updateUser = async (_id, field, data) => {
 		default:
 			return 0;
 	}
+};
+
+export const deleteUser = async (_id) => {
+	const user = await UserModel.findByIdAndDelete(_id);
+	if (user) return 1;
+	else return 0;
 };
 
 //----------------------------------------------------------------------------------------------
