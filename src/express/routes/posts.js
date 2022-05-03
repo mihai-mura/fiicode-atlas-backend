@@ -4,11 +4,14 @@ import {
 	addPostFileUrls,
 	changePostStatus,
 	createPost,
+	deletePost,
 	deletePostFileUrls,
 	downvotePost,
+	editPost,
 	getCityPosts,
 	getPostByID,
 	getPosts,
+	getUserPosts,
 	isVerified,
 	upvotePost,
 } from '../../database/mongoStuff.js';
@@ -59,6 +62,29 @@ router.post('/create/files/:postId', verifyToken, writeFilesPostContent.any(), a
 			res.sendStatus(200);
 		} else {
 			res.sendStatus(400);
+		}
+	} catch (error) {
+		console.log(error);
+		res.sendStatus(500);
+	}
+});
+
+router.put('/edit/:id', verifyToken, async (req, res) => {
+	try {
+		const dbResponse = await editPost(req.params.id, req._id, req.body.title, req.body.description);
+		switch (dbResponse) {
+			case 1:
+				res.sendStatus(200);
+				break;
+			case 0:
+				res.sendStatus(404);
+				break;
+			case -1:
+				res.sendStatus(403);
+				break;
+			default:
+				res.sendStatus(500);
+				break;
 		}
 	} catch (error) {
 		console.log(error);
@@ -154,6 +180,17 @@ router.get('/all', async (req, res) => {
 	}
 });
 
+router.get('/user/all', verifyToken, async (req, res) => {
+	try {
+		const posts = await getUserPosts(req._id);
+		if (!posts) res.sendStatus(404);
+		else res.send(posts);
+	} catch (error) {
+		console.log(error);
+		res.sendStatus(500);
+	}
+});
+
 router.get('/city/:city', async (req, res) => {
 	try {
 		const posts = await getCityPosts(req.params.city);
@@ -173,6 +210,29 @@ router.get('/:id', async (req, res) => {
 		console.log(error);
 		if (error.kind === 'ObjectId') res.sendStatus(404);
 		else res.sendStatus(500);
+	}
+});
+
+router.delete('/:id', verifyToken, async (req, res) => {
+	try {
+		const dbResponse = await deletePost(req.params.id, req._id);
+		switch (dbResponse) {
+			case 1:
+				res.sendStatus(200);
+				break;
+			case 0:
+				res.sendStatus(404);
+				break;
+			case -1:
+				res.sendStatus(403);
+				break;
+			default:
+				res.sendStatus(500);
+				break;
+		}
+	} catch (error) {
+		console.log(error);
+		res.sendStatus(500);
 	}
 });
 

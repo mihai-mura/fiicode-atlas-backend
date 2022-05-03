@@ -239,6 +239,11 @@ export const getPosts = async () => {
 	return posts;
 };
 
+export const getUserPosts = async (_id) => {
+	const posts = await PostModel.find({ user: _id });
+	return posts;
+};
+
 export const getCityPosts = async (city) => {
 	const posts = await PostModel.find({ city });
 	return posts;
@@ -319,7 +324,27 @@ export const changePostStatus = async (postId, status) => {
 	return 1;
 };
 
+export const editPost = async (postId, userId, title, description) => {
+	//returns 1 if success | 0 if no post | -1 if access denied
+	const post = await PostModel.findById(postId);
+	if (!post) return 0;
+	if (post?.user === userId) {
+		await PostModel.findByIdAndUpdate(postId, { title, description });
+		return 1;
+	} else return -1;
+};
+
 export const deletePostFileUrls = async (_id) => {
 	const post = await PostModel.findByIdAndUpdate(_id, { file_urls: [] });
 	return post;
+};
+
+export const deletePost = async (postId, userId) => {
+	//returns 1 if success | 0 if no post | -1 if access denied
+	const post = await PostModel.findById(postId);
+	if (!post) return 0;
+	if (post?.user === userId) {
+		await PostModel.findByIdAndDelete(postId);
+		return 1;
+	} else return -1;
 };
