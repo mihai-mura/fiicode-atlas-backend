@@ -10,10 +10,13 @@ import {
 	editPost,
 	getCityPosts,
 	getPostByID,
-	getPosts,
+	getAllPosts,
+	getUnverifiedPosts,
+	getUserCity,
 	getUserPosts,
 	isVerified,
 	upvotePost,
+	verifyPost,
 } from '../../database/mongoStuff.js';
 import { writeFilesPostContent } from '../../database/fileStorage/multerStuff.js';
 import firebaseBucket, { createPersistentDownloadUrl } from '../../database/fileStorage/firebase/firebaseStorage.js';
@@ -63,6 +66,40 @@ router.post('/create/files/:postId', verifyToken, writeFilesPostContent.any(), a
 		} else {
 			res.sendStatus(400);
 		}
+	} catch (error) {
+		console.log(error);
+		res.sendStatus(500);
+	}
+});
+
+router.put('/approve/:id', verifyToken, authorize(ROLE.MODERATOR), async (req, res) => {
+	try {
+		await verifyPost(req.params.id);
+		res.sendStatus(200);
+	} catch (error) {
+		console.log(error);
+		res.sendStatus(500);
+	}
+});
+
+router.put('/deny/:id', verifyToken, authorize(ROLE.MODERATOR), async (req, res) => {
+	try {
+		const dbResponse = await deletePost(req.params.id);
+		switch (dbResponse) {
+			case 1:
+				res.sendStatus(200);
+				break;
+			case 0:
+				res.sendStatus(404);
+				break;
+			case -1:
+				res.sendStatus(403);
+				break;
+			default:
+				res.sendStatus(500);
+				break;
+		}
+		//! send mail to user
 	} catch (error) {
 		console.log(error);
 		res.sendStatus(500);
@@ -172,7 +209,7 @@ router.put('/downvote/:postId', verifyToken, authorize(ROLE.USER), async (req, r
 
 router.get('/all', async (req, res) => {
 	try {
-		const posts = await getPosts();
+		const posts = await getAllPosts();
 		res.send(posts);
 	} catch (error) {
 		console.log(error);
@@ -185,6 +222,17 @@ router.get('/user/all', verifyToken, async (req, res) => {
 		const posts = await getUserPosts(req._id);
 		if (!posts) res.sendStatus(404);
 		else res.send(posts);
+	} catch (error) {
+		console.log(error);
+		res.sendStatus(500);
+	}
+});
+
+router.get('/unverified', verifyToken, authorize(ROLE.MODERATOR), async (req, res) => {
+	try {
+		const city = await getUserCity(req._id);
+		const posts = await getUnverifiedPosts(city);
+		res.send(posts);
 	} catch (error) {
 		console.log(error);
 		res.sendStatus(500);

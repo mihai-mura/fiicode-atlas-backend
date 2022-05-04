@@ -10,6 +10,7 @@ const postSchema = new mongoose.Schema(
 		upvotes: { type: [String], default: [] },
 		downvotes: { type: [String], default: [] },
 		file_urls: { type: Array, default: [] },
+		verified: { type: Boolean, default: false },
 	},
 	{
 		collection: 'posts',

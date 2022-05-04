@@ -1,5 +1,5 @@
 import express from 'express';
-import { getAdminCity, getAllModerators, createModerator, deleteModerator } from '../../database/mongoStuff.js';
+import { getUserCity, getAllModerators, createModerator, deleteModerator } from '../../database/mongoStuff.js';
 import { verifyToken, authorize } from '../middleware.js';
 import ROLE from '../roles.js';
 import bcrypt from 'bcrypt';
@@ -10,7 +10,7 @@ const router = express.Router();
 router.post('/', verifyToken, authorize(ROLE.LOCAL_ADMIN), async (req, res) => {
 	try {
 		const hashedPass = await bcrypt.hash(req.body.password, 10);
-		const city = await getAdminCity(req._id);
+		const city = await getUserCity(req._id);
 		const dbResponse = await createModerator(req.body.email, hashedPass, req.body.firstName, req.body.lastName, city);
 		if (dbResponse === 1) {
 			res.sendStatus(201);
@@ -27,7 +27,7 @@ router.post('/', verifyToken, authorize(ROLE.LOCAL_ADMIN), async (req, res) => {
 
 router.get('/all', verifyToken, authorize([ROLE.LOCAL_ADMIN, ROLE.GENERAL_ADMIN]), async (req, res) => {
 	try {
-		const city = await getAdminCity(req._id);
+		const city = await getUserCity(req._id);
 		const moderators = await getAllModerators(city);
 		res.send(
 			moderators.map((moderator) => ({

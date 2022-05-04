@@ -9,7 +9,7 @@ import {
 	updateUserIdPicUrl,
 	updateUser,
 	getUnverifiedUsers,
-	getAdminCity,
+	getUserCity,
 	deleteUser,
 } from '../../database/mongoStuff.js';
 import { authorize, verifyToken } from '../middleware.js';
@@ -147,7 +147,7 @@ router.get('/:id/full-name', async (req, res) => {
 //unverified users
 router.get('/unverified/', verifyToken, authorize(ROLE.LOCAL_ADMIN), async (req, res) => {
 	try {
-		const city = await getAdminCity(req._id);
+		const city = await getUserCity(req._id);
 		const users = await getUnverifiedUsers(city);
 		res.send(users);
 	} catch (error) {

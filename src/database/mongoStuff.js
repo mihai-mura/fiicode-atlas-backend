@@ -172,7 +172,7 @@ export const getAllAdmins = async () => {
 	const admins = await UserModel.find({ role: ROLE.LOCAL_ADMIN });
 	return admins;
 };
-export const getAdminCity = async (_id) => {
+export const getUserCity = async (_id) => {
 	const user = await UserModel.findById(_id).select({ _id: 0, city: 1 });
 	return user.city;
 };
@@ -234,13 +234,18 @@ export const createPost = async (title, description, user, city) => {
 	return createdPost;
 };
 
-export const getPosts = async () => {
-	const posts = await PostModel.find({});
+export const getAllPosts = async () => {
+	const posts = await PostModel.find({ verified: true });
 	return posts;
 };
 
 export const getUserPosts = async (_id) => {
 	const posts = await PostModel.find({ user: _id });
+	return posts;
+};
+
+export const getUnverifiedPosts = async (city) => {
+	const posts = await PostModel.find({ verified: false, city });
 	return posts;
 };
 
@@ -334,16 +339,20 @@ export const editPost = async (postId, userId, title, description) => {
 	} else return -1;
 };
 
+export const verifyPost = async (id) => {
+	await PostModel.findByIdAndUpdate(id, { verified: true });
+};
+
 export const deletePostFileUrls = async (_id) => {
 	const post = await PostModel.findByIdAndUpdate(_id, { file_urls: [] });
 	return post;
 };
 
-export const deletePost = async (postId, userId) => {
+export const deletePost = async (postId, userId = null) => {
 	//returns 1 if success | 0 if no post | -1 if access denied
 	const post = await PostModel.findById(postId);
 	if (!post) return 0;
-	if (post?.user === userId) {
+	if (post?.user === userId || userId === null) {
 		await PostModel.findByIdAndDelete(postId);
 		return 1;
 	} else return -1;
