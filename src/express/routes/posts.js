@@ -21,6 +21,7 @@ import {
 import { writeFilesPostContent } from '../../database/fileStorage/multerStuff.js';
 import firebaseBucket, { createPersistentDownloadUrl } from '../../database/fileStorage/firebase/firebaseStorage.js';
 import ROLE from '../roles.js';
+import PostModel from '../../database/models/PostModel.js';
 
 const router = express.Router();
 
@@ -209,8 +210,34 @@ router.put('/downvote/:postId', verifyToken, authorize(ROLE.USER), async (req, r
 
 router.get('/all', async (req, res) => {
 	try {
-		const posts = await getAllPosts();
-		res.send(posts);
+		const results = {};
+		if (req.query.limit) {
+			const page = parseInt(req.query.page);
+			const limit = parseInt(req.query.limit);
+
+			const startIndex = (page - 1) * limit;
+			const endIndex = page * limit;
+
+			if (endIndex < (await PostModel.countDocuments())) {
+				results.next = {
+					page: page + 1,
+					limit: limit,
+				};
+			}
+
+			if (startIndex >= 0) {
+				if (startIndex > 0)
+					results.previous = {
+						page: page - 1,
+						limit: limit,
+					};
+				results.posts = await getAllPosts(limit, startIndex);
+			} else return res.sendStatus(400);
+		} else {
+			results.posts = await getAllPosts();
+		}
+
+		res.send(results);
 	} catch (error) {
 		console.log(error);
 		res.sendStatus(500);

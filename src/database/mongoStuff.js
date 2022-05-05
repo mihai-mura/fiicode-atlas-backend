@@ -234,8 +234,12 @@ export const createPost = async (title, description, user, city) => {
 	return createdPost;
 };
 
-export const getAllPosts = async () => {
-	const posts = await PostModel.find({ verified: true });
+export const getAllPosts = async (limit = null, startIndex = 0) => {
+	if (limit === null) {
+		const posts = await PostModel.find({ verified: true });
+		return posts;
+	}
+	const posts = await PostModel.find({ verified: true }).limit(limit).skip(startIndex);
 	return posts;
 };
 
