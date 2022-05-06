@@ -57,6 +57,7 @@ router.post('/register', async (req, res) => {
 					role: user.role,
 					upvotedPosts: user.upvoted_posts,
 					downvotedPosts: user.downvoted_posts,
+					favouritePosts: user.favourite_posts,
 				},
 			});
 		}
@@ -102,6 +103,7 @@ router.post('/login', async (req, res) => {
 						role: user.role,
 						upvotedPosts: user.upvoted_posts,
 						downvotedPosts: user.downvoted_posts,
+						favouritePosts: user.favourite_posts,
 					},
 				});
 			} else res.sendStatus(403);
@@ -126,6 +128,7 @@ router.get('/', verifyToken, async (req, res) => {
 			role: user.role,
 			upvotedPosts: user.upvoted_posts,
 			downvotedPosts: user.downvoted_posts,
+			favouritePosts: user.favourite_posts,
 		});
 	} catch (error) {
 		console.log(error);

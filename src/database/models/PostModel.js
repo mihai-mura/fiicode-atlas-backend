@@ -9,6 +9,7 @@ const postSchema = new mongoose.Schema(
 		status: { type: String, default: 'sent' }, //sent | seen | in-progress | resolved
 		upvotes: { type: [String], default: [] },
 		downvotes: { type: [String], default: [] },
+		favourite_by: { type: [String], default: [] },
 		file_urls: { type: Array, default: [] },
 		verified: { type: Boolean, default: false },
 	},

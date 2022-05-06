@@ -17,6 +17,8 @@ import {
 	isVerified,
 	upvotePost,
 	verifyPost,
+	favouritePost,
+	getFavouritePosts,
 } from '../../database/mongoStuff.js';
 import { writeFilesPostContent } from '../../database/fileStorage/multerStuff.js';
 import firebaseBucket, { createPersistentDownloadUrl } from '../../database/fileStorage/firebase/firebaseStorage.js';
@@ -208,6 +210,29 @@ router.put('/downvote/:postId', verifyToken, authorize(ROLE.USER), async (req, r
 	}
 });
 
+//this route can also be called to remove downvotes
+router.put('/favourite/:postId', verifyToken, authorize(ROLE.USER), async (req, res) => {
+	try {
+		const dbResponse = await favouritePost(req.params.postId, req._id);
+		switch (dbResponse) {
+			case 0:
+				res.sendStatus(404);
+				break;
+			case 1:
+				res.send('added to favourites');
+				break;
+			case -1:
+				res.send('removed from favourites');
+				break;
+			default:
+				res.sendStatus(500);
+		}
+	} catch (error) {
+		console.log(error);
+		res.sendStatus(500);
+	}
+});
+
 router.get('/all', async (req, res) => {
 	try {
 		const results = {};
@@ -249,6 +274,16 @@ router.get('/user/all', verifyToken, async (req, res) => {
 		const posts = await getUserPosts(req._id);
 		if (!posts) res.sendStatus(404);
 		else res.send(posts);
+	} catch (error) {
+		console.log(error);
+		res.sendStatus(500);
+	}
+});
+
+router.get('/favourites', verifyToken, authorize(ROLE.USER), async (req, res) => {
+	try {
+		const posts = await getFavouritePosts(req._id);
+		res.send(posts);
 	} catch (error) {
 		console.log(error);
 		res.sendStatus(500);

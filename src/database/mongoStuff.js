@@ -248,6 +248,11 @@ export const getUserPosts = async (_id) => {
 	return posts;
 };
 
+export const getFavouritePosts = async (_id) => {
+	const posts = await PostModel.find({ favourite_by: _id });
+	return posts;
+};
+
 export const getUnverifiedPosts = async (city) => {
 	const posts = await PostModel.find({ verified: false, city });
 	return posts;
@@ -323,6 +328,25 @@ export const downvotePost = async (postId, user) => {
 		await UserModel.findByIdAndUpdate(user, { $pull: { upvoted_posts: postId } });
 		return 1;
 	}
+};
+
+//* returns 0 if no post found | 1 if added to favourites | -1 if removed from favourites
+export const favouritePost = async (postId, user) => {
+	//post can be added to favourites by the creator if it isn't verified
+	const post =
+		(await PostModel.findOne({ _id: postId, verified: true })) || (await PostModel.findOne({ _id: postId, user: user }));
+	if (!post) {
+		return 0;
+	}
+	if (post.favourite_by.includes(user)) {
+		//remove favourite
+		await PostModel.findByIdAndUpdate(postId, { $pull: { favourite_by: user } });
+		await UserModel.findByIdAndUpdate(user, { $pull: { favourite_posts: postId } });
+		return -1;
+	}
+	await PostModel.findByIdAndUpdate(postId, { $push: { favourite_by: user } });
+	await UserModel.findByIdAndUpdate(user, { $push: { favourite_posts: postId } });
+	return 1;
 };
 
 export const changePostStatus = async (postId, status) => {
