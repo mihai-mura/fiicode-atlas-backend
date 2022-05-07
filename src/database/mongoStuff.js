@@ -234,17 +234,56 @@ export const createPost = async (title, description, user, city) => {
 	return createdPost;
 };
 
-export const getAllPosts = async (limit = null, startIndex = 0) => {
+export const getAllPosts = async (limit = null, startIndex = 0, sort = 'date') => {
 	if (limit === null) {
 		const posts = await PostModel.find({ verified: true });
 		return posts;
 	}
-	const posts = await PostModel.find({ verified: true }).limit(limit).skip(startIndex);
+	let posts;
+	switch (sort) {
+		case 'date':
+			posts = await PostModel.find({ verified: true }).sort({ createdAt: -1 }).limit(limit).skip(startIndex);
+			break;
+		case 'upvotes':
+			posts = await PostModel.find({ verified: true }).sort({ upvotes: -1, createdAt: -1 }).limit(limit).skip(startIndex);
+			break;
+		case 'downvotes':
+			posts = await PostModel.find({ verified: true }).sort({ downvotes: -1, createdAt: -1 }).limit(limit).skip(startIndex);
+			break;
+		case 'sent':
+			posts = await PostModel.find({ verified: true, status: 'sent' })
+				.sort({ createdAt: -1 })
+				.limit(limit)
+				.skip(startIndex);
+			break;
+		case 'seen':
+			posts = await PostModel.find({ verified: true, status: 'seen' })
+				.sort({ createdAt: -1 })
+				.limit(limit)
+				.skip(startIndex);
+			break;
+		case 'in-progress':
+			posts = await PostModel.find({ verified: true, status: 'in-progress' })
+				.sort({ createdAt: -1 })
+				.limit(limit)
+				.skip(startIndex);
+			break;
+		case 'resolved':
+			posts = await PostModel.find({ verified: true, status: 'resolved' })
+				.sort({ createdAt: -1 })
+				.limit(limit)
+				.skip(startIndex);
+			break;
+
+		default:
+			posts = await PostModel.find({ verified: true }).sort({ createdAt: -1 }).limit(limit).skip(startIndex);
+			break;
+	}
 	return posts;
 };
 
 export const getUserPosts = async (_id) => {
-	const posts = await PostModel.find({ user: _id });
+	const posts = await PostModel.find({ user: _id }).sort({ createdAt: -1 });
 	return posts;
 };
 
@@ -258,8 +297,35 @@ export const getUnverifiedPosts = async (city) => {
 	return posts;
 };
 
-export const getCityPosts = async (city) => {
-	const posts = await PostModel.find({ city });
+export const getCityPosts = async (city, sort = 'date') => {
+	let posts;
+	switch (sort) {
+		case 'date':
+			posts = await PostModel.find({ city }).sort({ createdAt: -1 });
+			break;
+		case 'upvotes':
+			posts = await PostModel.find({ city }).sort({ upvotes: -1, createdAt: -1 });
+			break;
+		case 'downvotes':
+			posts = await PostModel.find({ city }).sort({ downvotes: -1, createdAt: -1 });
+			break;
+		case 'sent':
+			posts = await PostModel.find({ city, status: 'sent' }).sort({ createdAt: -1 });
+			break;
+		case 'seen':
+			posts = await PostModel.find({ city, status: 'seen' }).sort({ createdAt: -1 });
+			break;
+		case 'in-progress':
+			posts = await PostModel.find({ city, status: 'in-progress' }).sort({ createdAt: -1 });
+			break;
+		case 'resolved':
+			posts = await PostModel.find({ city, status: 'resolved' }).sort({ createdAt: -1 });
+			break;
+
+		default:
+			posts = await PostModel.find({ city }).sort({ createdAt: -1 });
+			break;
+	}
 	return posts;
 };
 

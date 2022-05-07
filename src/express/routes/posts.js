@@ -134,26 +134,27 @@ router.put('/edit/:id', verifyToken, async (req, res) => {
 
 router.put('/status', verifyToken, authorize(ROLE.LOCAL_ADMIN), async (req, res) => {
 	try {
+		let dbResponse;
 		switch (req.body.status) {
 			case 'sent':
-				const dbResponse = await changePostStatus(req.body.id, 'sent');
+				dbResponse = await changePostStatus(req.body.id, 'sent');
 				if (dbResponse) res.sendStatus(200);
 				else if (!dbResponse) res.sendStatus(404);
 				break;
 			case 'seen':
-				const dbResponse2 = await changePostStatus(req.body.id, 'seen');
-				if (dbResponse2) res.sendStatus(200);
-				else if (!dbResponse2) res.sendStatus(404);
+				dbResponse = await changePostStatus(req.body.id, 'seen');
+				if (dbResponse) res.sendStatus(200);
+				else if (!dbResponse) res.sendStatus(404);
 				break;
 			case 'in-progress':
-				const dbResponse3 = await changePostStatus(req.body.id, 'in-progress');
-				if (dbResponse3) res.sendStatus(200);
-				else if (!dbResponse3) res.sendStatus(404);
+				dbResponse = await changePostStatus(req.body.id, 'in-progress');
+				if (dbResponse) res.sendStatus(200);
+				else if (!dbResponse) res.sendStatus(404);
 				break;
 			case 'resolved':
-				const dbResponse4 = await changePostStatus(req.body.id, 'resolved');
-				if (dbResponse4) res.sendStatus(200);
-				else if (!dbResponse4) res.sendStatus(404);
+				dbResponse = await changePostStatus(req.body.id, 'resolved');
+				if (dbResponse) res.sendStatus(200);
+				else if (!dbResponse) res.sendStatus(404);
 				break;
 			default:
 				res.sendStatus(400);
@@ -233,12 +234,14 @@ router.put('/favourite/:postId', verifyToken, authorize(ROLE.USER), async (req, 
 	}
 });
 
+//*post sort types: date, upvotes, downvotes, sent, seen, in-progress, resolved
 router.get('/all', async (req, res) => {
 	try {
 		const results = {};
 		if (req.query.limit) {
 			const page = parseInt(req.query.page);
 			const limit = parseInt(req.query.limit);
+			const sort = req.query.sort;
 
 			const startIndex = (page - 1) * limit;
 			const endIndex = page * limit;
@@ -256,7 +259,7 @@ router.get('/all', async (req, res) => {
 						page: page - 1,
 						limit: limit,
 					};
-				results.posts = await getAllPosts(limit, startIndex);
+				results.posts = await getAllPosts(limit, startIndex, sort);
 			} else return res.sendStatus(400);
 		} else {
 			results.posts = await getAllPosts();
@@ -303,7 +306,7 @@ router.get('/unverified', verifyToken, authorize(ROLE.MODERATOR), async (req, re
 
 router.get('/city/:city', async (req, res) => {
 	try {
-		const posts = await getCityPosts(req.params.city);
+		const posts = await getCityPosts(req.params.city, req.query.sort);
 		res.send(posts);
 	} catch (error) {
 		console.log(error);
