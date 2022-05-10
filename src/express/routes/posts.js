@@ -19,11 +19,13 @@ import {
 	verifyPost,
 	favouritePost,
 	getFavouritePosts,
+	getUserEmailFromPost,
 } from '../../database/mongoStuff.js';
 import { writeFilesPostContent } from '../../database/fileStorage/multerStuff.js';
 import firebaseBucket, { createPersistentDownloadUrl } from '../../database/fileStorage/firebase/firebaseStorage.js';
 import ROLE from '../roles.js';
 import PostModel from '../../database/models/PostModel.js';
+import { sendPostRejectedMail } from '../../mail/mail.js';
 
 const router = express.Router();
 
@@ -87,6 +89,7 @@ router.put('/approve/:id', verifyToken, authorize(ROLE.MODERATOR), async (req, r
 
 router.put('/deny/:id', verifyToken, authorize(ROLE.MODERATOR), async (req, res) => {
 	try {
+		const email = await getUserEmailFromPost(req.params.id);
 		const dbResponse = await deletePost(req.params.id);
 		switch (dbResponse) {
 			case 1:
@@ -102,7 +105,7 @@ router.put('/deny/:id', verifyToken, authorize(ROLE.MODERATOR), async (req, res)
 				res.sendStatus(500);
 				break;
 		}
-		//! send mail to user
+		await sendPostRejectedMail(email);
 	} catch (error) {
 		console.log(error);
 		res.sendStatus(500);

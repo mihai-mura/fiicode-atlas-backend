@@ -30,11 +30,58 @@ export const sendPassRecoverMail = async (to, link) => {
 		from: process.env.EMAIL_USER,
 		to: to,
 		subject: 'Password Recovery',
-		// text: `Click this link to recover your password: http://localhost:3000/recover-password/${link}`,
 		template: 'passRecovery',
 		context: {
 			link: `http://localhost:3000/recover-password/${link}`,
 		},
+		attachments: [
+			{
+				filename: 'logo-cityq.png',
+				path: path.resolve('./src/mail/images/logo-cityq.png'),
+				cid: 'logo',
+			},
+		],
+	};
+	await transporter
+		.sendMail(mailOptions)
+		.then(() => {
+			console.log(`Email sent to: ${to}`);
+		})
+		.catch((error) => {
+			console.log(error);
+		});
+};
+
+export const sendPostRejectedMail = async (to) => {
+	const mailOptions = {
+		from: process.env.EMAIL_USER,
+		to: to,
+		subject: 'Post Rejected',
+		template: 'postRejected',
+		attachments: [
+			{
+				filename: 'logo-cityq.png',
+				path: path.resolve('./src/mail/images/logo-cityq.png'),
+				cid: 'logo',
+			},
+		],
+	};
+	await transporter
+		.sendMail(mailOptions)
+		.then(() => {
+			console.log(`Email sent to: ${to}`);
+		})
+		.catch((error) => {
+			console.log(error);
+		});
+};
+
+export const sendUserRejectedMail = async (to) => {
+	const mailOptions = {
+		from: process.env.EMAIL_USER,
+		to: to,
+		subject: 'Address verification failed',
+		template: 'userRejected',
 		attachments: [
 			{
 				filename: 'logo-cityq.png',

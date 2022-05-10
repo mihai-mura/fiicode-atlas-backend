@@ -32,6 +32,12 @@ export const getUserById = async (_id) => {
 	return user;
 };
 
+export const getUserEmailFromPost = async (postId) => {
+	const post = await PostModel.findById(postId);
+	const user = await UserModel.findById(post.user);
+	return user.email;
+};
+
 export const getUserByEmail = async (email) => {
 	const user = await UserModel.findOne({ email: email });
 	return user;

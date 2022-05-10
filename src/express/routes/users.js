@@ -17,7 +17,7 @@ import { writeFileIdPicture, writeFileProfilePicture } from '../../database/file
 import firebaseBucket from '../../database/fileStorage/firebase/firebaseStorage.js';
 import { createPersistentDownloadUrl } from '../../database/fileStorage/firebase/firebaseStorage.js';
 import ROLE from '../roles.js';
-import { sendPassRecoverMail } from '../../mail/mail.js';
+import { sendPassRecoverMail, sendUserRejectedMail } from '../../mail/mail.js';
 
 const router = express.Router();
 
@@ -225,13 +225,14 @@ router.put('/verify-address/:id', verifyToken, authorize(ROLE.LOCAL_ADMIN), asyn
 
 router.delete('/deny-address/:id', verifyToken, authorize(ROLE.LOCAL_ADMIN), async (req, res) => {
 	try {
+		const user = await getUserById(req.params.id);
 		const dbResponse = await deleteUser(req.params.id);
 		if (!dbResponse) res.sendStatus(404);
 		else {
 			//delete profile pic and id pic
 			await firebaseBucket.file(`user-profilePics/${req.params.id}.jpg`).delete();
 			await firebaseBucket.file(`user-IDs/${req.params.id}.jpg`).delete();
-			//! send email to user
+			await sendUserRejectedMail(user.email);
 			res.sendStatus(200);
 		}
 	} catch (error) {
