@@ -26,6 +26,8 @@ import firebaseBucket, { createPersistentDownloadUrl } from '../../database/file
 import ROLE from '../roles.js';
 import PostModel from '../../database/models/PostModel.js';
 import { sendPostRejectedMail } from '../../mail/mail.js';
+import fs from 'fs';
+import path from 'path';
 
 const router = express.Router();
 
@@ -54,17 +56,45 @@ router.post('/create/files/:postId', verifyToken, writeFilesPostContent.any(), a
 
 		//deletes the previous url array & firebase files and verifies if post exists
 		const post = await deletePostFileUrls(req.params.postId);
-		const files = await firebaseBucket.getFiles();
-		const filesToDelete = files[0].filter((file) => file.name.includes(`post-files/${req.params.postId}`));
-		filesToDelete.forEach(async (file) => {
-			await file.delete();
-		});
+		if (process.env.POST_FILES_FIREBASE) {
+			const files = await firebaseBucket.getFiles();
+			const filesToDelete = files[0].filter((file) => file.name.includes(`post-files/${req.params.postId}`));
+			filesToDelete.forEach(async (file) => {
+				await file.delete();
+			});
+		} else {
+			//delete post files from local storage
+			fs.readdir(process.env.POST_FILES_PATH, (err, files) => {
+				if (err) console.log(err);
+
+				files.map((file) => {
+					if (file.includes(req.params.postId)) {
+						fs.unlink(path.join(process.env.POST_FILES_PATH, file), (err) => {
+							if (err) console.log(err);
+						});
+					}
+				});
+			});
+		}
 
 		if (post) {
 			req.files.forEach(async (file, index) => {
 				// post filename template: postId_order_originalFileName.jpg/mp4
-				firebaseBucket.file(`post-files/${req.params.postId}_${index}_${file.originalname}`).save(file.buffer);
-				const downloadUrl = createPersistentDownloadUrl(`post-files/${req.params.postId}_${index}_${file.originalname}`);
+				let downloadUrl;
+				if (process.env.POST_FILES_FIREBASE) {
+					firebaseBucket.file(`post-files/${req.params.postId}_${index}_${file.originalname}`).save(file.buffer);
+					downloadUrl = createPersistentDownloadUrl(`post-files/${req.params.postId}_${index}_${file.originalname}`);
+				} else {
+					fs.writeFile(
+						path.join(process.env.POST_FILES_PATH, `${req.params.postId}_${index}_${file.originalname}`),
+						file.buffer,
+						(err) => {
+							if (err) console.log(err);
+						}
+					);
+					//!
+					downloadUrl = `http://${process.env.HOSTNAME}/posts/get-file/${req.params.postId}_${index}_${file.originalname}`;
+				}
 				await addPostFileUrls(req.params.postId, downloadUrl);
 			});
 			res.sendStatus(200);
@@ -106,6 +136,26 @@ router.put('/deny/:id', verifyToken, authorize(ROLE.MODERATOR), async (req, res)
 				break;
 		}
 		await sendPostRejectedMail(email);
+		if (process.env.POST_FILES_FIREBASE) {
+			const files = await firebaseBucket.getFiles();
+			const filesToDelete = files[0].filter((file) => file.name.includes(`post-files/${req.params.postId}`));
+			filesToDelete.forEach(async (file) => {
+				await file.delete();
+			});
+		} else {
+			//delete post files from local storage
+			fs.readdir(process.env.POST_FILES_PATH, (err, files) => {
+				if (err) console.log(err);
+
+				files.map((file) => {
+					if (file.includes(req.params.id)) {
+						fs.unlink(path.join(process.env.POST_FILES_PATH, file), (err) => {
+							if (err) console.log(err);
+						});
+					}
+				});
+			});
+		}
 	} catch (error) {
 		console.log(error);
 		res.sendStatus(500);
@@ -269,6 +319,15 @@ router.get('/all', async (req, res) => {
 		}
 
 		res.send(results);
+	} catch (error) {
+		console.log(error);
+		res.sendStatus(500);
+	}
+});
+
+router.get('/get-file/:filename', async (req, res) => {
+	try {
+		res.sendFile(path.join(process.env.POST_FILES_PATH, req.params.filename));
 	} catch (error) {
 		console.log(error);
 		res.sendStatus(500);
