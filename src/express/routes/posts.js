@@ -92,7 +92,6 @@ router.post('/create/files/:postId', verifyToken, writeFilesPostContent.any(), a
 							if (err) console.log(err);
 						}
 					);
-					//!
 					downloadUrl = `http://${process.env.HOSTNAME}/posts/get-file/${req.params.postId}_${index}_${file.originalname}`;
 				}
 				await addPostFileUrls(req.params.postId, downloadUrl);
