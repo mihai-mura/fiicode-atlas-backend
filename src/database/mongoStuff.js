@@ -251,10 +251,56 @@ export const getAllPosts = async (limit = null, startIndex = 0, sort = 'date') =
 			posts = await PostModel.find({ verified: true }).sort({ createdAt: -1 }).limit(limit).skip(startIndex);
 			break;
 		case 'upvotes':
-			posts = await PostModel.find({ verified: true }).sort({ upvotes: -1, createdAt: -1 }).limit(limit).skip(startIndex);
+			posts = await PostModel.aggregate([
+				{ $match: { verified: true } },
+				{
+					$project: {
+						_id: 1,
+						title: 1,
+						description: 1,
+						user: 1,
+						city: 1,
+						status: 1,
+						upvotes: 1,
+						downvotes: 1,
+						favourite_by: 1,
+						file_urls: 1,
+						verified: 1,
+						createdAt: 1,
+						updatedAt: 1,
+						upvotesl: { $size: '$upvotes' },
+					},
+				},
+				{ $sort: { upvotesl: -1 } },
+				{ $skip: startIndex },
+				{ $limit: limit },
+			]);
 			break;
 		case 'downvotes':
-			posts = await PostModel.find({ verified: true }).sort({ downvotes: -1, createdAt: -1 }).limit(limit).skip(startIndex);
+			posts = await PostModel.aggregate([
+				{ $match: { verified: true } },
+				{
+					$project: {
+						_id: 1,
+						title: 1,
+						description: 1,
+						user: 1,
+						city: 1,
+						status: 1,
+						upvotes: 1,
+						downvotes: 1,
+						favourite_by: 1,
+						file_urls: 1,
+						verified: 1,
+						createdAt: 1,
+						updatedAt: 1,
+						downvotesl: { $size: '$downvotes' },
+					},
+				},
+				{ $sort: { downvotesl: -1 } },
+				{ $skip: startIndex },
+				{ $limit: limit },
+			]);
 			break;
 		case 'sent':
 			posts = await PostModel.find({ verified: true, status: 'sent' })
