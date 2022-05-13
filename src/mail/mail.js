@@ -32,7 +32,9 @@ export const sendPassRecoverMail = async (to, link) => {
 		subject: 'Password Recovery',
 		template: 'passRecovery',
 		context: {
-			link: `http://localhost:3000/recover-password/${link}`,
+			link: `http://${process.env.PUBLIC_SITE_LINK}/recover-password/${link}`,
+			defaultHostname: process.env.PUBLIC_SITE_LINK,
+			defaultLink: `http://${process.env.PUBLIC_SITE_LINK}`,
 		},
 		attachments: [
 			{
@@ -58,6 +60,10 @@ export const sendPostRejectedMail = async (to) => {
 		to: to,
 		subject: 'Post Rejected',
 		template: 'postRejected',
+		context: {
+			defaultHostname: process.env.PUBLIC_SITE_LINK,
+			defaultLink: `http://${process.env.PUBLIC_SITE_LINK}`,
+		},
 		attachments: [
 			{
 				filename: 'logo-cityq.png',
@@ -82,6 +88,10 @@ export const sendUserRejectedMail = async (to) => {
 		to: to,
 		subject: 'Address verification failed',
 		template: 'userRejected',
+		context: {
+			defaultHostname: process.env.PUBLIC_SITE_LINK,
+			defaultLink: `http://${process.env.PUBLIC_SITE_LINK}`,
+		},
 		attachments: [
 			{
 				filename: 'logo-cityq.png',
