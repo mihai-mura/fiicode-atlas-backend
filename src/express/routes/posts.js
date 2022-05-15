@@ -137,7 +137,7 @@ router.put('/deny/:id', verifyToken, authorize(ROLE.MODERATOR), async (req, res)
 		await sendPostRejectedMail(email);
 		if (process.env.POST_FILES_FIREBASE) {
 			const files = await firebaseBucket.getFiles();
-			const filesToDelete = files[0].filter((file) => file.name.includes(`post-files/${req.params.postId}`));
+			const filesToDelete = files[0].filter((file) => file.name.includes(`post-files/${req.params.id}`));
 			filesToDelete.forEach(async (file) => {
 				await file.delete();
 			});
@@ -390,6 +390,26 @@ router.get('/:id', async (req, res) => {
 router.delete('/:id', verifyToken, async (req, res) => {
 	try {
 		const dbResponse = await deletePost(req.params.id, req._id);
+		if (process.env.POST_FILES_FIREBASE) {
+			const files = await firebaseBucket.getFiles();
+			const filesToDelete = files[0].filter((file) => file.name.includes(`post-files/${req.params.id}`));
+			filesToDelete.forEach(async (file) => {
+				await file.delete();
+			});
+		} else {
+			//delete post files from local storage
+			fs.readdir(process.env.POST_FILES_PATH, (err, files) => {
+				if (err) console.log(err);
+
+				files.map((file) => {
+					if (file.includes(req.params.id)) {
+						fs.unlink(path.join(process.env.POST_FILES_PATH, file), (err) => {
+							if (err) console.log(err);
+						});
+					}
+				});
+			});
+		}
 		switch (dbResponse) {
 			case 1:
 				res.sendStatus(200);
